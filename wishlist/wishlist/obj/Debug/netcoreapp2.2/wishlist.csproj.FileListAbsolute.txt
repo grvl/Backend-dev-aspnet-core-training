@@ -1,0 +1,14 @@
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\bin\Debug\netcoreapp2.2\wishlist.deps.json
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\bin\Debug\netcoreapp2.2\wishlist.runtimeconfig.json
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\bin\Debug\netcoreapp2.2\wishlist.runtimeconfig.dev.json
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\bin\Debug\netcoreapp2.2\wishlist.dll
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\bin\Debug\netcoreapp2.2\wishlist.pdb
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.csprojAssemblyReference.cache
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.csproj.CoreCompileInputs.cache
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.RazorAssemblyInfo.cache
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.RazorAssemblyInfo.cs
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.AssemblyInfoInputs.cache
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.AssemblyInfo.cs
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.RazorTargetAssemblyInfo.cache
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.dll
+C:\Users\gabriela.vaz\Documents\Treinamento\Wishlist\wishlist\wishlist\obj\Debug\netcoreapp2.2\wishlist.pdb

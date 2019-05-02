@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace wishlist.Models
 {
-    public partial class UserLists
+    public partial class UserList
     {
         public int UserId { get; set; }
         public int ListId { get; set; }
 
-        public virtual Lists List { get; set; }
+        public virtual List List { get; set; }
         public virtual Users User { get; set; }
     }
 }

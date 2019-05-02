@@ -11,46 +11,46 @@ namespace wishlist.Controllers
 {
     [Route("api/wishlist/[controller]")]
     [ApiController]
-    public class ItemsController : ControllerBase
+    public class ItemController : ControllerBase
     {
         private readonly WishlistDBContext _context;
 
-        public ItemsController(WishlistDBContext context)
+        public ItemController(WishlistDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Items
+        // GET: api/Item
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Items>>> GetItems()
+        public async Task<ActionResult<IEnumerable<Item>>> GetItem()
         {
-            return await _context.Items.ToListAsync();
+            return await _context.Item.ToListAsync();
         }
 
-        // GET: api/Items/5
+        // GET: api/Item/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Items>> GetItems(int id)
+        public async Task<ActionResult<Item>> GetItem(int id)
         {
-            var items = await _context.Items.FindAsync(id);
+            var Item = await _context.Item.FindAsync(id);
 
-            if (items == null)
+            if (Item == null)
             {
                 return NotFound();
             }
 
-            return items;
+            return Item;
         }
 
-        // PUT: api/Items/5
+        // PUT: api/Item/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItems(int id, Items items)
+        public async Task<IActionResult> PutItem(int id, Item Item)
         {
-            if (id != items.ItemId)
+            if (id != Item.ItemId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(items).State = EntityState.Modified;
+            _context.Entry(Item).State = EntityState.Modified;
 
             try
             {
@@ -58,7 +58,7 @@ namespace wishlist.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ItemsExists(id))
+                if (!ItemExists(id))
                 {
                     return NotFound();
                 }
@@ -71,18 +71,18 @@ namespace wishlist.Controllers
             return NoContent();
         }
 
-        // POST: api/Items
+        // POST: api/Item
         [HttpPost]
-        public async Task<ActionResult<Items>> PostItems(Items items)
+        public async Task<ActionResult<Item>> PostItem(Item Item)
         {
-            _context.Items.Add(items);
+            _context.Item.Add(Item);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (ItemsExists(items.ItemId))
+                if (ItemExists(Item.ItemId))
                 {
                     return Conflict();
                 }
@@ -92,28 +92,28 @@ namespace wishlist.Controllers
                 }
             }
 
-            return CreatedAtAction("GetItems", new { id = items.ItemId }, items);
+            return CreatedAtAction("GetItem", new { id = Item.ItemId }, Item);
         }
 
-        // DELETE: api/Items/5
+        // DELETE: api/Item/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Items>> DeleteItems(int id)
+        public async Task<ActionResult<Item>> DeleteItem(int id)
         {
-            var items = await _context.Items.FindAsync(id);
-            if (items == null)
+            var Item = await _context.Item.FindAsync(id);
+            if (Item == null)
             {
                 return NotFound();
             }
 
-            _context.Items.Remove(items);
+            _context.Item.Remove(Item);
             await _context.SaveChangesAsync();
 
-            return items;
+            return Item;
         }
 
-        private bool ItemsExists(int id)
+        private bool ItemExists(int id)
         {
-            return _context.Items.Any(e => e.ItemId == id);
+            return _context.Item.Any(e => e.ItemId == id);
         }
     }
 }

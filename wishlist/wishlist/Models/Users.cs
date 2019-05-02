@@ -7,14 +7,15 @@ namespace wishlist.Models
     {
         public Users()
         {
-            UserLists = new HashSet<UserLists>();
+            UserList = new HashSet<UserList>();
         }
 
         public int UserId { get; set; }
         public string Username { get; set; }
         public string Pswd { get; set; }
+        public string UserRole { get; set; }
         public string Token { get; set; }
 
-        public virtual ICollection<UserLists> UserLists { get; set; }
+        public virtual ICollection<UserList> UserList { get; set; }
     }
 }

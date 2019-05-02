@@ -15,9 +15,9 @@ namespace wishlist.Models
         {
         }
 
-        public virtual DbSet<Items> Items { get; set; }
-        public virtual DbSet<Lists> Lists { get; set; }
-        public virtual DbSet<UserLists> UserLists { get; set; }
+        public virtual DbSet<Item> Item { get; set; }
+        public virtual DbSet<List> List { get; set; }
+        public virtual DbSet<UserList> UserList { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -33,13 +33,8 @@ namespace wishlist.Models
         {
             modelBuilder.HasAnnotation("ProductVersion", "2.2.3-servicing-35854");
 
-            modelBuilder.Entity<Items>(entity =>
+            modelBuilder.Entity<Item>(entity =>
             {
-                entity.HasKey(e => e.ItemId)
-                    .HasName("PK__Items__727E838BCFB68623");
-
-                entity.Property(e => e.ItemId).ValueGeneratedNever();
-
                 entity.Property(e => e.Bought).HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.ItemName)
@@ -54,38 +49,33 @@ namespace wishlist.Models
                 entity.Property(e => e.Quantity).HasDefaultValueSql("((1))");
 
                 entity.HasOne(d => d.List)
-                    .WithMany(p => p.Items)
+                    .WithMany(p => p.Item)
                     .HasForeignKey(d => d.ListId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_PartOfList");
             });
 
-            modelBuilder.Entity<Lists>(entity =>
+            modelBuilder.Entity<List>(entity =>
             {
-                entity.HasKey(e => e.ListId)
-                    .HasName("PK__Lists__E383280501BEB558");
-
-                entity.Property(e => e.ListId).ValueGeneratedNever();
-
                 entity.Property(e => e.ListName)
                     .IsRequired()
                     .HasMaxLength(25)
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<UserLists>(entity =>
+            modelBuilder.Entity<UserList>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.ListId })
-                    .HasName("PK__UserList__59B0FECCA6391E40");
+                    .HasName("PK__UserList__59B0FECC60A5ECD7");
 
                 entity.HasOne(d => d.List)
-                    .WithMany(p => p.UserLists)
+                    .WithMany(p => p.UserList)
                     .HasForeignKey(d => d.ListId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ListOwned");
 
                 entity.HasOne(d => d.User)
-                    .WithMany(p => p.UserLists)
+                    .WithMany(p => p.UserList)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserOwner");
@@ -93,15 +83,25 @@ namespace wishlist.Models
 
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.HasKey(e => e.UserId)
-                    .HasName("PK__Users__1788CC4C0A74D3D2");
+                entity.HasKey(e => e.UserId);
 
-                entity.Property(e => e.UserId).ValueGeneratedNever();
+                entity.HasIndex(e => e.Username)
+                    .HasName("UQ__Users__F3DBC5729EE90806")
+                    .IsUnique();
 
                 entity.Property(e => e.Pswd)
                     .IsRequired()
                     .HasColumnName("pswd")
                     .HasColumnType("text");
+
+                entity.Property(e => e.Token)
+                    .HasColumnName("token")
+                    .HasColumnType("text");
+
+                entity.Property(e => e.UserRole)
+                    .HasColumnName("userRole")
+                    .HasColumnType("text")
+                    .HasDefaultValueSql("('User')");
 
                 entity.Property(e => e.Username)
                     .IsRequired()

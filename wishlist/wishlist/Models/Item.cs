@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace wishlist.Models
 {
-    public partial class Items
+    public partial class Item
     {
         public int ItemId { get; set; }
         public int ListId { get; set; }
@@ -12,6 +12,6 @@ namespace wishlist.Models
         public decimal? Price { get; set; }
         public bool? Bought { get; set; }
 
-        public virtual Lists List { get; set; }
+        public virtual List List { get; set; }
     }
 }

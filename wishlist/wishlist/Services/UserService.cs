@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -15,17 +16,15 @@ namespace wishlist.Services
 {
     public class UserService : IUserService
     {
+        
         // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<Users> _users = new List<Users>
-        {
-            new Users {Username = "test", Pswd = "test" }
-        };
+       private readonly WishlistDBContext _context;
+        private DbSet<Users> _users;
 
-        private readonly AppSettings _appSettings;
-
-        public UserService(IOptions<AppSettings> appSettings)
+        public UserService(WishlistDBContext context)
         {
-            _appSettings = appSettings.Value;
+            _context = context;
+            _users = context.Users;
         }
 
         public Users Authenticate(string username, string password)
@@ -36,39 +35,46 @@ namespace wishlist.Services
             if (user == null)
                 return null;
 
-            // authentication successful so generate jwt token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.UserId.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            user.Token = tokenHandler.WriteToken(token);
-
             // remove password before returning
             user.Pswd = null;
 
             return user;
         }
 
-        public IEnumerable<Users> GetAll()
+        public Users Create(Users user)
         {
-            // return users without passwords
-            return _users.Select(x => {
-                x.Pswd = null;
-                return x;
-            });
+            _users.Add(new Users { Username = user.Username, Pswd = user.Pswd });
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return user;
         }
 
-        IEnumerable<Users> IUserService.GetAll()
+        public IEnumerable<Users> GetAll()
         {
-            throw new NotImplementedException();
+            // return users
+            return _users.Select(s => new Users
+            {
+                Username = s.Username,
+                UserRole = s.UserRole
+            }).ToList();
+        }
+
+        public Users GetById(int id)
+        {
+            var user = _users.FirstOrDefault(x => x.UserId == id);
+
+            // return user without password
+            if (user != null)
+                user.Pswd = null;
+
+            return user;
         }
     }
 }

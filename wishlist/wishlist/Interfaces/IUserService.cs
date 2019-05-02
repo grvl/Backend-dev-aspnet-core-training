@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using wishlist.Models;
 
 namespace wishlist.Interfaces
 {
     public interface IUserService
     {
-        User Authenticate(string username, string password);
-        IEnumerable<User> GetAll();
+        Users Authenticate(string username, string password);
+        IEnumerable<Users> GetAll();
+        Users GetById(int id);
+        Users Create(Users user);
     }
 }

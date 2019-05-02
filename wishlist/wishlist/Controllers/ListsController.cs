@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,48 +10,49 @@ using wishlist.Models;
 
 namespace wishlist.Controllers
 {
+    [Authorize]
     [Route("api/wishlist/[controller]")]
     [ApiController]
-    public class ListsController : ControllerBase
+    public class ListController : ControllerBase
     {
         private readonly WishlistDBContext _context;
 
-        public ListsController(WishlistDBContext context)
+        public ListController(WishlistDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Lists
+        // GET: api/List
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lists>>> GetLists()
+        public async Task<ActionResult<IEnumerable<List>>> GetList()
         {
-            return await _context.Lists.ToListAsync();
+            return await _context.List.ToListAsync();
         }
 
-        // GET: api/Lists/5
+        // GET: api/List/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Lists>> GetLists(int id)
+        public async Task<ActionResult<List>> GetList(int id)
         {
-            var lists = await _context.Lists.FindAsync(id);
+            var List = await _context.List.FindAsync(id);
 
-            if (lists == null)
+            if (List == null)
             {
                 return NotFound();
             }
 
-            return lists;
+            return List;
         }
 
-        // PUT: api/Lists/5
+        // PUT: api/List/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLists(int id, Lists lists)
+        public async Task<IActionResult> PutList(int id, List List)
         {
-            if (id != lists.ListId)
+            if (id != List.ListId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(lists).State = EntityState.Modified;
+            _context.Entry(List).State = EntityState.Modified;
 
             try
             {
@@ -58,7 +60,7 @@ namespace wishlist.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ListsExists(id))
+                if (!ListExists(id))
                 {
                     return NotFound();
                 }
@@ -71,18 +73,18 @@ namespace wishlist.Controllers
             return NoContent();
         }
 
-        // POST: api/Lists
+        // POST: api/List
         [HttpPost]
-        public async Task<ActionResult<Lists>> PostLists(Lists lists)
+        public async Task<ActionResult<List>> PostList(List List)
         {
-            _context.Lists.Add(lists);
+            _context.List.Add(List);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (ListsExists(lists.ListId))
+                if (ListExists(List.ListId))
                 {
                     return Conflict();
                 }
@@ -92,28 +94,28 @@ namespace wishlist.Controllers
                 }
             }
 
-            return CreatedAtAction("GetLists", new { id = lists.ListId }, lists);
+            return CreatedAtAction("GetList", new { id = List.ListId }, List);
         }
 
-        // DELETE: api/Lists/5
+        // DELETE: api/List/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Lists>> DeleteLists(int id)
+        public async Task<ActionResult<List>> DeleteList(int id)
         {
-            var lists = await _context.Lists.FindAsync(id);
-            if (lists == null)
+            var List = await _context.List.FindAsync(id);
+            if (List == null)
             {
                 return NotFound();
             }
 
-            _context.Lists.Remove(lists);
+            _context.List.Remove(List);
             await _context.SaveChangesAsync();
 
-            return lists;
+            return List;
         }
 
-        private bool ListsExists(int id)
+        private bool ListExists(int id)
         {
-            return _context.Lists.Any(e => e.ListId == id);
+            return _context.List.Any(e => e.ListId == id);
         }
     }
 }

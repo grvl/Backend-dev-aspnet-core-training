@@ -6,7 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
+using wishlist.Helpers;
+using wishlist.Interfaces;
 using wishlist.Models;
+using wishlist.Services;
 
 namespace wishlist.Controllers
 {
@@ -16,106 +20,167 @@ namespace wishlist.Controllers
     public class ListController : ControllerBase
     {
         private readonly WishlistDBContext _context;
+        private readonly IListService _listService;
 
-        public ListController(WishlistDBContext context)
+        public ListController(WishlistDBContext context, IListService listService)
         {
             _context = context;
+            _listService = listService;
         }
 
         // GET: api/List
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<List>>> GetList()
+        [HttpGet("{page}/{pageSize}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Get all lists owned or shared with the user.",
+            Description = "Can't access a list of lists for another user."
+        )]
+        public ActionResult<List> GetList(int page, int pageSize)
         {
-            return await _context.List.ToListAsync();
+            var response =  _listService.GetAll(int.Parse(User.Identity.Name), page, pageSize);
+
+            if (response.HasMessage())
+            {
+                return BadRequest(new { message = response.Message });
+            }
+
+            return Ok(response.Value);
         }
 
         // GET: api/List/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<List>> GetList(int id)
+        [HttpGet("{id}/page/pageSize")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Get information from a list.",
+            Description = "Normal users can only access lists they own, while admins can access any list."
+        )]
+        public ActionResult<List> GetList(int id, int page, int pageSize)
         {
-            var List = await _context.List.FindAsync(id);
-
-            if (List == null)
+            if (!IsListOwnerOrAdmin(id))
             {
-                return NotFound();
+                return Forbid();
             }
 
-            return List;
+            var response = _listService.GetById(id, page, pageSize);
+
+            if (response.HasMessage())
+            {
+                return BadRequest(new { message = response.Message });
+            }
+
+            return Ok(response.Value);
         }
 
         // PUT: api/List/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutList(int id, List List)
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Edit information from a list.",
+            Description = "Normal users can only access lists they own, while admins can access any list."
+        )]
+        public async Task<ActionResult> PutList(int id, List List)
         {
-            if (id != List.ListId)
+            if (!IsListOwnerOrAdmin(id))
             {
-                return BadRequest();
+                return Forbid();
             }
 
-            _context.Entry(List).State = EntityState.Modified;
 
-            try
+            var response = await _listService.EditAsync(id, List);
+
+            if(response.HasMessage())
             {
-                await _context.SaveChangesAsync();
+                return BadRequest(new {message = response.Message});
             }
-            catch (DbUpdateConcurrencyException)
+
+            return Ok(response.Value);
+        }
+
+        // PUT: api/List/5
+        [HttpPut("{id}/{userId}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Share a list with another user.",
+            Description = "Normal users can only share lists they own, while admins can share any list."
+        )]
+        public async Task<ActionResult> ShareList(int id, int userId)
+        {
+            if (!IsListOwnerOrAdmin(id))
             {
-                if (!ListExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Forbid();
+            }if (!IsListOwnerOrAdmin(id))
+            {
+                return Forbid();
+            }
+
+
+            var response = await _listService.ShareAsync(id, userId);
+
+            if (response.HasMessage())
+            {
+                return BadRequest(new {message = response.Message});
+            }
+
+            return Ok(response.Value);
+        }
+
+        // POST: api/List
+        [HttpPost]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Create a new list.",
+            Description = "The list will start with just it's creator as an owner, and more can be added with the share feature."
+        )]
+        public async Task<ActionResult> PostList(List List)
+        {
+
+            var response = await _listService.CreateAsync(List, User.Identity.Name);
+            if (response.HasMessage())
+            {
+                return BadRequest(new {message = response.Message});
+            }
+
+            return Ok(response.Value);
+        }
+
+        // DELETE: api/List/5
+        [HttpDelete("{id}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Delete a list.",
+            Description = "Normal users can only access lists they own, while admins can access any list."
+        )]
+        public async Task<ActionResult> DeleteList(int id)
+        {
+            if (!IsListOwnerOrAdmin(id))
+            {
+                return Forbid();
+            }
+
+            var response = await _listService.DeleteAsync(id);
+            if (response.HasMessage())
+            {
+                return BadRequest(new {message = response.Message});
             }
 
             return NoContent();
         }
 
-        // POST: api/List
-        [HttpPost]
-        public async Task<ActionResult<List>> PostList(List List)
+        private bool IsListOwnerOrAdmin(int id)
         {
-            _context.List.Add(List);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ListExists(List.ListId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetList", new { id = List.ListId }, List);
-        }
-
-        // DELETE: api/List/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<List>> DeleteList(int id)
-        {
-            var List = await _context.List.FindAsync(id);
-            if (List == null)
-            {
-                return NotFound();
-            }
-
-            _context.List.Remove(List);
-            await _context.SaveChangesAsync();
-
-            return List;
-        }
-
-        private bool ListExists(int id)
-        {
-            return _context.List.Any(e => e.ListId == id);
+            var currentUserId = int.Parse(User.Identity.Name);
+            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId).Count() > 0;
+            return (userIsOwner || User.IsInRole(Role.Admin));
         }
     }
 }

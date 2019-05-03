@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Swagger;
 using wishlist.Helpers;
 using wishlist.Interfaces;
 using wishlist.Services;
@@ -29,7 +31,9 @@ namespace wishlist
             services.AddDbContext<Models.WishlistDBContext>(opt =>
                 opt.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=WishlistDB;Trusted_Connection=True;"));
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options => {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            }); ;
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -58,7 +62,14 @@ namespace wishlist
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IListService, ListService>();
+            services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IJwtService, JwtService>();
+
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new Info { Description = "Documentação da API", Version = "1.0" });
+                c.EnableAnnotations();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,6 +88,10 @@ namespace wishlist
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
         }
     }
 }

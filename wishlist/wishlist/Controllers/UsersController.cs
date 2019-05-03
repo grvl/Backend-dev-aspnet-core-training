@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using wishlist.Helpers;
 using wishlist.Interfaces;
 using wishlist.Models;
@@ -28,50 +29,77 @@ namespace wishlist.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Authenticates a user and returns a jwt token.",
+            Description = "Doen't require authentication."
+        )]
         public IActionResult Authenticate([FromBody]Users userParam)
         {
-            var user = _userService.Authenticate(userParam.Username, userParam.Pswd);
+            var response = _userService.Authenticate(userParam.Username, userParam.Pswd);
 
-            if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+            if (response.HasMessage())
+                return BadRequest(new { message = response.Message });
 
+            Users user = (Users) response.Value;
             // authentication successful so generate jwt token
             user.Token = _jwtService.CreateJwtToken(user);
-
-            // remove password before returning
-            user.Pswd = null;
 
             return Ok(user);
         }
 
         [AllowAnonymous]
         [HttpPost("register")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Create a user but doesn't log them in.",
+            Description = "Doesn't require authentication."
+        )]
         public IActionResult Register([FromBody]Users userParam)
         {
-            var user = _userService.Create(userParam);
+            var response = _userService.Create(userParam);
 
-            if (user == null)
-                return BadRequest(new { message = "Failed to register" });
+            if (response.HasMessage())
+                return BadRequest(new { message = response.Message});
 
-            return Ok();
+            return Ok(response.Value);
         }
 
         [Authorize(Roles = Role.Admin)]
         [HttpGet]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Get information from all users.",
+            Description = "Only admin role can use this command."
+        )]
         public IActionResult GetAll()
         {
-            var users = _userService.GetAll();
-            return Ok(users);
+            var response = _userService.GetAll();
+
+            if (response.HasMessage())
+                return BadRequest(new { message = response.Message });
+
+            return Ok(response.Value);
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Get information from a user.",
+            Description = "Only admin role can get information from another user."
+        )]
         public IActionResult GetById(int id)
         {
-            var user = _userService.GetById(id);
+            var response = _userService.GetById(id);
 
-            if (user == null)
+            if (response.HasMessage())
             {
-                return NotFound();
+                return BadRequest(new { message = response.Message });
             }
 
             // only allow admins to access other user records
@@ -81,121 +109,7 @@ namespace wishlist.Controllers
                 return Forbid();
             }
 
-            return Ok(user);
+            return Ok(response.Value);
         }
     }
-    //private readonly WishlistDBContext _context;
-
-    //public UsersController(WishlistDBContext context)
-    //{
-    //    _context = context;
-    //}
-
-    //// GET: api/Users
-    //[HttpGet]
-    //public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
-    //{
-    //    return await _context.Users.ToListAsync();
-    //}
-
-    //// GET: api/Users/5
-    //[HttpGet("{id}")]
-    //public async Task<ActionResult<Users>> GetUsers(int id)
-    //{
-    //    var users = await _context.Users.FindAsync(id);
-
-    //    if (users == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    return users;
-    //}
-
-    //[AllowAnonymous]
-    //[HttpPost("authenticate")]
-    //public IActionResult Authenticate([FromBody]User userParam)
-    //{
-    //    var user = _context.Authenticate(userParam.Username, userParam.Password);
-
-    //    if (user == null)
-    //        return BadRequest(new { message = "Username or password is incorrect" });
-
-    //    return Ok(user);
-    //}
-
-    //// PUT: api/Users/5
-    //[HttpPut("{id}")]
-    //public async Task<IActionResult> PutUsers(int id, Users users)
-    //{
-    //    if (id != users.UserId)
-    //    {
-    //        return BadRequest();
-    //    }
-
-    //    _context.Entry(users).State = EntityState.Modified;
-
-    //    try
-    //    {
-    //        await _context.SaveChangesAsync();
-    //    }
-    //    catch (DbUpdateConcurrencyException)
-    //    {
-    //        if (!UsersExists(id))
-    //        {
-    //            return NotFound();
-    //        }
-    //        else
-    //        {
-    //            throw;
-    //        }
-    //    }
-
-    //    return NoContent();
-    //}
-
-    //// POST: api/Users
-    //[HttpPost]
-    //public async Task<ActionResult<Users>> PostUsers(Users users)
-    //{
-    //    _context.Users.Add(users);
-    //    try
-    //    {
-    //        await _context.SaveChangesAsync();
-    //    }
-    //    catch (DbUpdateException)
-    //    {
-    //        if (UsersExists(users.UserId))
-    //        {
-    //            return Conflict();
-    //        }
-    //        else
-    //        {
-    //            throw;
-    //        }
-    //    }
-
-    //    return CreatedAtAction("GetUsers", new { id = users.UserId }, users);
-    //}
-
-    //// DELETE: api/Users/5
-    //[HttpDelete("{id}")]
-    //public async Task<ActionResult<Users>> DeleteUsers(int id)
-    //{
-    //    var users = await _context.Users.FindAsync(id);
-    //    if (users == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    _context.Users.Remove(users);
-    //    await _context.SaveChangesAsync();
-
-    //    return users;
-    //}
-
-    //private bool UsersExists(int id)
-    //{
-    //    return _context.Users.Any(e => e.UserId == id);
-    //}
 }

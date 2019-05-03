@@ -18,63 +18,83 @@ namespace wishlist.Services
     {
         
         // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-       private readonly WishlistDBContext _context;
-        private DbSet<Users> _users;
+        private readonly WishlistDBContext _context;
 
         public UserService(WishlistDBContext context)
         {
             _context = context;
-            _users = context.Users;
         }
 
-        public Users Authenticate(string username, string password)
+        public ReturnObject<Users> Authenticate(string username, string password)
         {
-            var user = _users.SingleOrDefault(x => x.Username == username && x.Pswd == password);
+            var user = _context.Users.SingleOrDefault(x => x.Username == username && x.Pswd == password);
 
             // return null if user not found
             if (user == null)
-                return null;
+                return new ReturnObject<Users> { Message = "Username os password is incorrect" };
 
             // remove password before returning
             user.Pswd = null;
 
-            return user;
+            return new ReturnObject<Users> { Value = user };
         }
 
-        public Users Create(Users user)
+        public ReturnObject<Users> Create(Users user)
         {
-            _users.Add(new Users { Username = user.Username, Pswd = user.Pswd });
+            var previousUser = _context.Users.SingleOrDefault(x => x.Username == user.Username);
+
+            if(previousUser != null)
+            {
+                return new ReturnObject<Users> { Message = "Username already in use." };
+            }
+
+            if(user.Pswd.Equals("") || user.Pswd == null)
+            {
+                return new ReturnObject<Users> { Message = "You must input a password." };
+            }
+
+            _context.Users.Add(new Users { Username = user.Username, Pswd = user.Pswd });
             try
             {
                 _context.SaveChanges();
             }
             catch (Exception)
             {
-                return null;
+                return new ReturnObject<Users> { Message = "Failed to create new user." }; ;
             }
 
-            return user;
+            return new ReturnObject<Users> {Value = user }; ;
         }
 
-        public IEnumerable<Users> GetAll()
+        public ReturnObject<Users> GetAll()
         {
-            // return users
-            return _users.Select(s => new Users
+            var users = _context.Users.Select(s => new Users
             {
                 Username = s.Username,
                 UserRole = s.UserRole
-            }).ToList();
+            });
+
+            if (users == null){
+                return new ReturnObject<Users> { Message = " Failed to load list of all users." };
+            }
+            // return users
+            return new ReturnObject<Users> { Values = users };
         }
 
-        public Users GetById(int id)
+        public ReturnObject<Users> GetById(int id)
         {
-            var user = _users.FirstOrDefault(x => x.UserId == id);
+            var user = _context.Users.FirstOrDefault(x => x.UserId == id);
+
+            if (user == null)
+            {
+                return new ReturnObject<Users> { Message = "User not found." };
+            }
 
             // return user without password
             if (user != null)
                 user.Pswd = null;
 
-            return user;
+            return new ReturnObject<Users> { Value = user };
         }
     }
 }

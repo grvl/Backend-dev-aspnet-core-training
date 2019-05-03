@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
+using wishlist.Helpers;
+using wishlist.Interfaces;
 using wishlist.Models;
 
 namespace wishlist.Controllers
@@ -13,107 +16,137 @@ namespace wishlist.Controllers
     [ApiController]
     public class ItemController : ControllerBase
     {
+        private readonly IItemService _itemService;
         private readonly WishlistDBContext _context;
 
-        public ItemController(WishlistDBContext context)
+        public ItemController(WishlistDBContext context, IItemService itemService)
         {
+            _itemService = itemService;
             _context = context;
-        }
-
-        // GET: api/Item
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Item>>> GetItem()
-        {
-            return await _context.Item.ToListAsync();
         }
 
         // GET: api/Item/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Item>> GetItem(int id)
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Get an item.",
+            Description = "Normal users can only access items in lists they own, while admins can access any item."
+        )]
+        public ActionResult<Item> GetItem(int id)
         {
-            var Item = await _context.Item.FindAsync(id);
-
-            if (Item == null)
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
+            if (permissionCheck.HasMessage())
             {
-                return NotFound();
+                return BadRequest(new { message = permissionCheck.Message });
+            }
+            if ((bool)permissionCheck.Value)
+            {
+                return Forbid();
             }
 
-            return Item;
+            var response = _itemService.GetById(id);
+
+            if (response.HasMessage())
+            {
+                return BadRequest(new { message = response.Message });
+            }
+
+            return Ok(response.Value);
         }
 
         // PUT: api/Item/5
         [HttpPut("{id}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Edit an item.",
+            Description = "Normal users can only access items in lists they own, while admins can access any item."
+        )]
         public async Task<IActionResult> PutItem(int id, Item Item)
         {
-            if (id != Item.ItemId)
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
+            if (permissionCheck.HasMessage())
             {
-                return BadRequest();
+                return BadRequest(new { message = permissionCheck.Message });
+            }
+            if ((bool)permissionCheck.Value)
+            {
+                return Forbid();
             }
 
-            _context.Entry(Item).State = EntityState.Modified;
-
-            try
+            var response = await _itemService.EditAsync(id, Item);
+            if (response.HasMessage())
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(new { message = response.Message });
             }
 
-            return NoContent();
+            return Ok(response.Value);
         }
 
         // POST: api/Item
         [HttpPost]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Create an item.",
+            Description = "Normal users can only add items to lists they own, while admins can access any list."
+        )]
         public async Task<ActionResult<Item>> PostItem(Item Item)
         {
-            _context.Item.Add(Item);
-            try
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(Item.ItemId, User);
+            if (permissionCheck.HasMessage())
             {
-                await _context.SaveChangesAsync();
+                return BadRequest(new { message = permissionCheck.Message });
             }
-            catch (DbUpdateException)
+            if ((bool)permissionCheck.Value)
             {
-                if (ItemExists(Item.ItemId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return Forbid();
             }
 
-            return CreatedAtAction("GetItem", new { id = Item.ItemId }, Item);
+            var response = await _itemService.CreateAsync(Item);
+            if (response.HasMessage())
+            {
+                return BadRequest(new { message = response.Message });
+            }
+
+            var item = (Item)response.Value;
+
+            return CreatedAtAction("GetItem", new { id = item.ItemId }, item);
         }
 
         // DELETE: api/Item/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [ProducesResponseType(statusCode: 403)]
+        [SwaggerOperation(
+            Summary = "Delete an item.",
+            Description = "Normal users can only access items in lists they own, while admins can access any item."
+        )]
         public async Task<ActionResult<Item>> DeleteItem(int id)
         {
-            var Item = await _context.Item.FindAsync(id);
-            if (Item == null)
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
+            if (permissionCheck.HasMessage())
             {
-                return NotFound();
+                return BadRequest(new { message = permissionCheck.Message });
+            }
+            if ((bool)permissionCheck.Value) { 
+                return Forbid();
             }
 
-            _context.Item.Remove(Item);
-            await _context.SaveChangesAsync();
+            var response = await _itemService.DeleteAsync(id);
+            if (response.HasMessage())
+            {
+                return BadRequest(new { message = response.Message });
+            }
 
-            return Item;
+            return Ok(response.Value);
+
         }
 
-        private bool ItemExists(int id)
-        {
-            return _context.Item.Any(e => e.ItemId == id);
-        }
     }
 }

@@ -71,13 +71,13 @@ namespace wishlist.Models
                 entity.HasOne(d => d.List)
                     .WithMany(p => p.UserList)
                     .HasForeignKey(d => d.ListId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_ListOwned");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserList)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_UserOwner");
             });
 

@@ -37,11 +37,7 @@ namespace wishlist.Controllers
         public ActionResult<Item> GetItem(int id)
         {
             var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
-            if (permissionCheck.HasMessage())
-            {
-                return BadRequest(new { message = permissionCheck.Message });
-            }
-            if ((bool)permissionCheck.Value)
+            if (!permissionCheck)
             {
                 return Forbid();
             }
@@ -65,19 +61,15 @@ namespace wishlist.Controllers
             Summary = "Edit an item.",
             Description = "Normal users can only access items in lists they own, while admins can access any item."
         )]
-        public async Task<IActionResult> PutItem(int id, Item Item)
+        public ActionResult<Item> PutItem(int id, Item Item)
         {
-            var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
-            if (permissionCheck.HasMessage())
-            {
-                return BadRequest(new { message = permissionCheck.Message });
-            }
-            if ((bool)permissionCheck.Value)
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(Item, User);
+            if (!permissionCheck)
             {
                 return Forbid();
             }
 
-            var response = await _itemService.EditAsync(id, Item);
+            var response =  _itemService.Edit(id, Item);
             if (response.HasMessage())
             {
                 return BadRequest(new { message = response.Message });
@@ -95,56 +87,49 @@ namespace wishlist.Controllers
             Summary = "Create an item.",
             Description = "Normal users can only add items to lists they own, while admins can access any list."
         )]
-        public async Task<ActionResult<Item>> PostItem(Item Item)
+        public  ActionResult<Item> PostItem(Item Item)
         {
-            var permissionCheck = _itemService.IsListOwnerOrAdmin(Item.ItemId, User);
-            if (permissionCheck.HasMessage())
-            {
-                return BadRequest(new { message = permissionCheck.Message });
-            }
-            if ((bool)permissionCheck.Value)
+            var permissionCheck = _itemService.IsListOwnerOrAdmin(Item, User);
+            if (!permissionCheck)
             {
                 return Forbid();
             }
 
-            var response = await _itemService.CreateAsync(Item);
+            var response =  _itemService.Create(Item);
             if (response.HasMessage())
             {
                 return BadRequest(new { message = response.Message });
             }
 
-            var item = (Item)response.Value;
+            var item = response.Value;
 
             return CreatedAtAction("GetItem", new { id = item.ItemId }, item);
         }
 
         // DELETE: api/Item/5
         [HttpDelete("{id}")]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 204)]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
             Summary = "Delete an item.",
             Description = "Normal users can only access items in lists they own, while admins can access any item."
         )]
-        public async Task<ActionResult<Item>> DeleteItem(int id)
+        public ActionResult<Item> DeleteItem(int id)
         {
             var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
-            if (permissionCheck.HasMessage())
-            {
-                return BadRequest(new { message = permissionCheck.Message });
-            }
-            if ((bool)permissionCheck.Value) { 
+            
+            if (permissionCheck) { 
                 return Forbid();
             }
 
-            var response = await _itemService.DeleteAsync(id);
+            var response =  _itemService.Delete(id);
             if (response.HasMessage())
             {
                 return BadRequest(new { message = response.Message });
             }
 
-            return Ok(response.Value);
+            return NoContent();
 
         }
 

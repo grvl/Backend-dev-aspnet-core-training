@@ -17,7 +17,6 @@ namespace wishlist.Services
     public class UserService : IUserService
     {
         
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
         private readonly WishlistDBContext _context;
 
         public UserService(WishlistDBContext context)
@@ -90,9 +89,7 @@ namespace wishlist.Services
                 return new ReturnObject<Users> { Message = "User not found." };
             }
 
-            // return user without password
-            if (user != null)
-                user.Pswd = null;
+            user.Pswd = null;
 
             return new ReturnObject<Users> { Value = user };
         }

@@ -6,10 +6,11 @@ using System.Linq;
 using wishlist.Models;
 using wishlist.Services;
 using wishlist.Interfaces;
+using System;
 
-namespace Wishlist.Tests
+namespace wishlist.Tests
 { 
-    public class UsersRepositoryTests
+    public class UserServiceTest
     {
         private IUserService repository;
         private Mock<DbSet<Users>> mockSet;
@@ -46,6 +47,9 @@ namespace Wishlist.Tests
 
             mockContext = new Mock<WishlistDBContext>();
             mockContext.Setup(c => c.Users).Returns(mockSet.Object);
+            mockContext.SetupSequence(c => c.SaveChanges())
+                .CallBase()
+                .Throws(new Exception());
 
             // Act - fetch Users
             repository = new UserService(mockContext.Object);
@@ -102,6 +106,26 @@ namespace Wishlist.Tests
             Assert.IsTrue(answer.HasMessage());
             mockSet.Verify(m => m.Add(It.IsAny<Users>()), Times.Never);
             mockContext.Verify(m => m.SaveChanges(), Times.Never);
+        }
+
+        [Test]
+        public void CreateUserWithDbErrorTest()
+        {
+            var answer1 = repository.Create(new Users
+            {
+                Username = "User7",
+                Pswd = "oiii"
+            });
+
+            var answer2 = repository.Create(new Users
+            {
+                Username = "User7",
+                Pswd = "oiii"
+            });
+
+            Assert.IsFalse(answer1.HasMessage());
+            Assert.IsTrue(answer2.HasMessage());
+            mockContext.Verify(m => m.SaveChanges(), Times.Exactly(2));
         }
 
         [Test]

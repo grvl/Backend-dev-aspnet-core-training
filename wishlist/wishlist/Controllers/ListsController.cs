@@ -29,16 +29,16 @@ namespace wishlist.Controllers
         }
 
         // GET: api/List
-        [HttpGet("{page}/{pageSize}")]
+        [HttpGet]
         [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [SwaggerOperation(
             Summary = "Get all lists owned or shared with the user.",
             Description = "Can't access a list of lists for another user."
         )]
-        public ActionResult<List> GetList(int page, int pageSize)
+        public ActionResult<List> GetLists([FromQuery] ObjectPagination objectPagination)
         {
-            var response =  _listService.GetAll(int.Parse(User.Identity.Name), page, pageSize);
+            var response =  _listService.GetAll(int.Parse(User.Identity.Name), objectPagination);
 
             if (response.HasMessage())
             {
@@ -49,7 +49,7 @@ namespace wishlist.Controllers
         }
 
         // GET: api/List/5
-        [HttpGet("{id}/page/pageSize")]
+        [HttpGet("{id}")]
         [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
@@ -57,14 +57,14 @@ namespace wishlist.Controllers
             Summary = "Get information from a list.",
             Description = "Normal users can only access lists they own, while admins can access any list."
         )]
-        public ActionResult<List> GetList(int id, int page, int pageSize)
+        public ActionResult<List> GetList(int id, [FromQuery] ObjectPagination objectPagination)
         {
             if (!IsListOwnerOrAdmin(id))
             {
                 return Forbid();
             }
 
-            var response = _listService.GetById(id, page, pageSize);
+            var response = _listService.GetById(id, objectPagination);
 
             if (response.HasMessage())
             {
@@ -83,7 +83,7 @@ namespace wishlist.Controllers
             Summary = "Edit information from a list.",
             Description = "Normal users can only access lists they own, while admins can access any list."
         )]
-        public async Task<ActionResult> PutList(int id, List List)
+        public  ActionResult<List> PutList(int id, List List)
         {
             if (!IsListOwnerOrAdmin(id))
             {
@@ -91,7 +91,7 @@ namespace wishlist.Controllers
             }
 
 
-            var response = await _listService.EditAsync(id, List);
+            var response = _listService.Edit(id, List);
 
             if(response.HasMessage())
             {
@@ -101,27 +101,25 @@ namespace wishlist.Controllers
             return Ok(response.Value);
         }
 
-        // PUT: api/List/5
+        // PUT: api/List/5/1
         [HttpPut("{id}/{userId}")]
         [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
             Summary = "Share a list with another user.",
-            Description = "Normal users can only share lists they own, while admins can share any list."
+            Description = 
+            "Normal users can only share lists they own, while admins can share any list. When you share a list, the" +
+            " other user will have all the same rights as you with the list."
         )]
-        public async Task<ActionResult> ShareList(int id, int userId)
+        public  ActionResult<List> ShareList(int id, int userId)
         {
             if (!IsListOwnerOrAdmin(id))
             {
                 return Forbid();
-            }if (!IsListOwnerOrAdmin(id))
-            {
-                return Forbid();
             }
 
-
-            var response = await _listService.ShareAsync(id, userId);
+            var response = _listService.Share(id, userId);
 
             if (response.HasMessage())
             {
@@ -139,10 +137,10 @@ namespace wishlist.Controllers
             Summary = "Create a new list.",
             Description = "The list will start with just it's creator as an owner, and more can be added with the share feature."
         )]
-        public async Task<ActionResult> PostList(List List)
+        public  ActionResult<List> PostList(List List)
         {
 
-            var response = await _listService.CreateAsync(List, User.Identity.Name);
+            var response = _listService.Create(List, int.Parse(User.Identity.Name));
             if (response.HasMessage())
             {
                 return BadRequest(new {message = response.Message});
@@ -153,21 +151,21 @@ namespace wishlist.Controllers
 
         // DELETE: api/List/5
         [HttpDelete("{id}")]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 204)]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
             Summary = "Delete a list.",
             Description = "Normal users can only access lists they own, while admins can access any list."
         )]
-        public async Task<ActionResult> DeleteList(int id)
+        public  ActionResult<List> DeleteList(int id)
         {
             if (!IsListOwnerOrAdmin(id))
             {
                 return Forbid();
             }
 
-            var response = await _listService.DeleteAsync(id);
+            var response = _listService.Delete(id);
             if (response.HasMessage())
             {
                 return BadRequest(new {message = response.Message});

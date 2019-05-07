@@ -12,26 +12,28 @@ namespace wishlist.Services
     public class ListService : IListService
     {
         private readonly WishlistDBContext _context;
+        private readonly ContextMockHelper _mockhelper;
 
-        public ListService(WishlistDBContext context)
+        public ListService(WishlistDBContext context, ContextMockHelper mockHelper = null)
         {
             _context = context;
+            _mockhelper = mockHelper == null ? new ContextMockHelper() : mockHelper;
         }
 
-        public async Task<ReturnObject<List>> CreateAsync(List list, String userId)
-        {
-            _context.Database.ExecuteSqlCommand($"exec [dbo].[sp_InsertUserListInfo] @ListName=@p0, @UserId=@p1",
-                parameters: new String[] { list.ListName.ToString(), userId});
+        public ReturnObject<List> Create(List list, int userId)
+        {     
             try
             {
-                await _context.SaveChangesAsync();
+                //Add to the List and UserList DBs
+                _mockhelper.RunStoredProcedure(_context, userId, list);
+                _context.SaveChanges();
             }
             catch (Exception)
             {
                 return new ReturnObject<List> { Message = "An error occured while trying to save the new list." };
             }
 
-            var created = await _context.List.OrderByDescending(l => l.ListId).FirstOrDefaultAsync();
+            var created = _context.List.OrderByDescending(l => l.ListId).FirstOrDefault();
 
             if (created == null)
             {
@@ -41,10 +43,11 @@ namespace wishlist.Services
             return new ReturnObject<List> { Value = created };
         }
 
-        public async Task<ReturnObject<List>> DeleteAsync(int id)
+        public ReturnObject<List> Delete(int id)
         {
+            var items = _context.Item.Where(i => i.ListId == id);
             var userList = _context.UserList.Where(ul => ul.ListId == id);
-            var List = await _context.List.FindAsync(id);
+            var List = _context.List.FirstOrDefault(l => l.ListId == id);
             if (List == null)
             {
                 return new ReturnObject<List> { Message = "List not found." };
@@ -52,71 +55,84 @@ namespace wishlist.Services
 
             if (userList.Count() == 0)
             {
+                _context.Item.RemoveRange(items);
                 _context.List.Remove(List);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return new ReturnObject<List> { Message = "List without owner." };
             }
 
+            _context.Item.RemoveRange(items);
             _context.UserList.RemoveRange(userList);
             _context.List.Remove(List);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return null;
+            return new ReturnObject<List> ();
         }
 
-        public async Task<ReturnObject<List>> EditAsync(int id, List list)
+        public ReturnObject<List> Edit(int id, List list)
         {
             if (id != list.ListId)
             {
                 return new ReturnObject<List> { Message = "Invalid list Id." };
             }
 
-            _context.Entry(list).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                if (!ListExists(id))
-                {
-                    return new ReturnObject<List> { Message = "List not found." };
-                }
-                else
-                {
-                    return new ReturnObject<List> { Message = "Error saving list into the DB." };
-                }
-            }
-
-            return new ReturnObject<List> { Value = list };
-        }
-
-        public ReturnObject<List> GetAll(int currentUserId, int page, int pageSize)
-        {
-            var list = _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Skip((page - 1) * pageSize).Take(pageSize);
-
-            if (list == null)
-            {
-                return new ReturnObject<List> { Message = "Error in retrieving the list." };
-            }
-
-            return new ReturnObject<List> { Values = list };
-        }
-
-        public ReturnObject<List> GetById(int id, int page, int pageSize)
-        {
-            var list = _context.List.Where(l => l.ListId == id).Include(l => l.UserList).FirstOrDefault();
-            if (list == null)
+            if (!ListExists(id))
             {
                 return new ReturnObject<List> { Message = "List not found." };
             }
-            var items = _context.Item.Where(i => i.ListId == list.ListId).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            list.Item = items;
+
+            _mockhelper.SetPropertyIsModified(_context, list);
+
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return new ReturnObject<List> { Message = "Error saving list into the DB." };
+            }
+
             return new ReturnObject<List> { Value = list };
         }
 
-        public async Task<ReturnObject<List>> ShareAsync(int listId, int userId)
+        public ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination)
+        {
+            var list = _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
+
+            if (list == null)
+            {
+                return new ReturnObject<PaginatedObject<List>> { Message = "Error in retrieving the list." };
+            }
+
+            var paginatedList = new PaginatedObject<List>("list", objectPagination, list, _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Count());
+
+            return new ReturnObject<PaginatedObject<List>> { Value = paginatedList };
+        }
+
+        public ReturnObject<ListWithPaginatedItems> GetById(int id, ObjectPagination objectPagination)
+        {
+            var list = _context.List.Where(l => l.ListId == id).Include(l => l.UserList).Select(l => new List {
+                ListId = l.ListId,
+                ListName = l.ListName,
+                UserList = l.UserList
+            }).FirstOrDefault();
+            if (list == null)
+            {
+                return new ReturnObject<ListWithPaginatedItems> { Message = "List not found." };
+            }
+            var items = _context.Item.Where(i => i.ListId == list.ListId).Select(i => new Item {
+                ItemId = i.ItemId,
+                ItemName = i.ItemName,
+                Quantity = i.Quantity,
+                Price = i.Price,
+                Bought = i.Bought
+            }).Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
+            var paginatedItems = new PaginatedObject<Item>($"list/{id}", objectPagination, items, _context.Item.Where(i => i.ListId == list.ListId).Count());
+
+            return new ReturnObject<ListWithPaginatedItems> { Value = new ListWithPaginatedItems { list = list, paginatedItems = paginatedItems } };
+        }
+
+        public ReturnObject<List> Share(int listId, int userId)
         {
             var list = _context.List.FirstOrDefault(l => l.ListId == listId);
 
@@ -131,13 +147,13 @@ namespace wishlist.Services
 
             try
             {
-                await _context.UserList.AddAsync(new UserList
+                _context.UserList.Add(new UserList
                 {
                     ListId = listId,
                     UserId = userId
                 });
 
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
             catch (Exception)
             {

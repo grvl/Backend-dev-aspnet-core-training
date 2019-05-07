@@ -13,71 +13,81 @@ namespace wishlist.Services
     public class ItemService : IItemService
     {
         private readonly WishlistDBContext _context;
+        private readonly ContextMockHelper _propertyModifier;
 
-        public ItemService(WishlistDBContext context)
+        public ItemService(WishlistDBContext context, ContextMockHelper propertyModifier= null)
         {
             _context = context;
+            _propertyModifier = propertyModifier == null? new ContextMockHelper() : propertyModifier;
+
         }
 
-        public async Task<ReturnObject<Item>> CreateAsync(Item item)
+        public virtual ReturnObject<Item> Create(Item item)
         {
+            if (ItemExists(item.ItemId))
+            {
+                return new ReturnObject<Item> { Message = "Item already exists." };
+            }
+
+            item.ItemId = 0;
 
             _context.Item.Add(item);
+
             try
             {
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
             catch (Exception)
             {
-                if (ItemExists(item.ItemId))
-                {
-                    return new ReturnObject<Item> { Message = "Item already exists." };
-                }
-                else
-                {
-                    return new ReturnObject<Item> { Message = "Error saving item into the DB." };
-                }
+                return new ReturnObject<Item> { Message = "Error saving item into the DB." };
             }
+
             return new ReturnObject<Item> {Value = item };
         }
 
-        public async Task<ReturnObject<Item>> DeleteAsync(int id)
+        public ReturnObject<Item> Delete(int id)
         {
-            var item = await _context.Item.FindAsync(id);
+            var item =  _context.Item.FirstOrDefault(i => i.ItemId == id);
             if (item == null)
             {
                 return new ReturnObject<Item> { Message = "Item not found." };
             }
 
             _context.Item.Remove(item);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.SaveChanges();
+            }
+            
+            catch (Exception)
+            {
+                return new ReturnObject<Item> { Message = "Error deleting item from the DB." };
+            }
 
-            return new ReturnObject<Item> { Value = item };
+            return new ReturnObject<Item> { Value = null };
         }
 
-        public async Task<ReturnObject<Item>> EditAsync(int id, Item item)
+        public ReturnObject<Item> Edit(int id, Item item)
         {
             if (id != item.ItemId)
             {
                 return new ReturnObject<Item> { Message = "Invalid item ID." };
             }
 
-            _context.Entry(item).State = EntityState.Modified;
+            if (!ItemExists(id))
+            {
+                return new ReturnObject<Item> { Message = "Item not found." };
+            }
+
+            _propertyModifier.SetPropertyIsModified(_context, item);
 
             try
             {
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
             catch (Exception)
             {
-                if (!ItemExists(id))
-                {
-                    return new ReturnObject<Item> { Message = "Item not found." };
-                }
-                else
-                {
-                    return new ReturnObject<Item> { Message = "Error saving item into the DB." };
-                }
+                return new ReturnObject<Item> { Message = "Error saving item into the DB." };
             }
 
             return new ReturnObject<Item> { Value = item };
@@ -101,18 +111,23 @@ namespace wishlist.Services
         }
 
 
-        public ReturnObject<bool> IsListOwnerOrAdmin(int itemId, ClaimsPrincipal User)
+        public bool IsListOwnerOrAdmin(Item item, ClaimsPrincipal User)
+        {
+            var id = item.ListId;
+            var currentUserId = int.Parse(User.Identity.Name);
+            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId).FirstOrDefault() != null;
+            return userIsOwner || User.IsInRole(Role.Admin) ;
+        }
+
+        public bool IsListOwnerOrAdmin(int itemId, ClaimsPrincipal User)
         {
             var item = _context.Item.Where(i => i.ItemId == itemId).FirstOrDefault();
             if (item == null)
             {
-                return new ReturnObject<bool> { Message = "Item not found" };
+                return false;
             }
 
-            var id = item.ListId;
-            var currentUserId = int.Parse(User.Identity.Name);
-            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId).Count() > 0;
-            return new ReturnObject<bool> { Value = (userIsOwner || User.IsInRole(Role.Admin)) };
+            return IsListOwnerOrAdmin(item, User);
         }
 
     }

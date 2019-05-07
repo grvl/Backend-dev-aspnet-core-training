@@ -42,7 +42,7 @@ namespace wishlist.Controllers
             if (response.HasMessage())
                 return BadRequest(new { message = response.Message });
 
-            Users user = (Users) response.Value;
+            Users user = response.Value;
             // authentication successful so generate jwt token
             user.Token = _jwtService.CreateJwtToken(user);
 

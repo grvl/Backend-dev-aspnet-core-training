@@ -12,9 +12,9 @@ IF OBJECT_ID(N'dbo.Users', N'U') IS NULL
 		CREATE TABLE dbo.Users
 			(UserId		int IDENTITY(1,1),
 			Username	varchar(25) NOT NULL UNIQUE,
-			Pswd		text NOT NULL,
-			UserRole	text DEFAULT 'User',
-			token		text,
+			Pswd		varchar(100) NOT NULL,
+			UserRole	varchar(100) DEFAULT 'User',
+			token		varchar(100),
 			CONSTRAINT PK_Users PRIMARY KEY(UserId)
 			)
 	END

@@ -9,11 +9,11 @@ namespace wishlist.Interfaces
 {
     public interface IListService
     {
-        ReturnObject<List> GetById(int id, int page, int pageSize);
-        ReturnObject<List> GetAll(int currentUserId, int page, int pageSize);
-        Task<ReturnObject<List>> CreateAsync(List list, string userId);
-        Task<ReturnObject<List>> EditAsync(int id, List list);
-        Task<ReturnObject<List>> ShareAsync(int listId, int userId);
-        Task<ReturnObject<List>> DeleteAsync(int id);
+        ReturnObject<ListWithPaginatedItems> GetById(int id, ObjectPagination objectPagination);
+        ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination);
+        ReturnObject<List> Create(List list, int userId);
+        ReturnObject<List> Edit(int id, List list);
+        ReturnObject<List> Share(int listId, int userId);
+        ReturnObject<List> Delete(int id);
     }
 }

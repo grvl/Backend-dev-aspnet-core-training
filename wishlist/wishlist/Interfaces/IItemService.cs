@@ -11,9 +11,10 @@ namespace wishlist.Interfaces
     public interface IItemService
     {
         ReturnObject<Item> GetById(int id);
-        Task<ReturnObject<Item>> CreateAsync(Item item);
-        Task<ReturnObject<Item>> EditAsync(int id, Item item);
-        Task<ReturnObject<Item>> DeleteAsync(int id);
-        ReturnObject<bool> IsListOwnerOrAdmin(int itemId, ClaimsPrincipal User);
+        ReturnObject<Item> Create(Item item);
+        ReturnObject<Item> Edit(int id, Item item);
+        ReturnObject<Item> Delete(int id);
+        bool IsListOwnerOrAdmin(Item item, ClaimsPrincipal User);
+        bool IsListOwnerOrAdmin(int itemId, ClaimsPrincipal User);
     }
 }

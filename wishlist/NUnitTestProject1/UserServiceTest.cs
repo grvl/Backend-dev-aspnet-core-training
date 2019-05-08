@@ -56,7 +56,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetAllUsersTest()
+        public void GetAll_Users_Successfully()
         {
             
             var actual = repository.GetAll().Values;
@@ -67,7 +67,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateUserTest()
+        public void Create_User_Successfully()
         {
             var answer = repository.Create(new Users
             {
@@ -81,7 +81,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateRepeatUserTest()
+        public void Create_RepeatUser_RepeatUsernameErrorMessage()
         {
             var answer = repository.Create(new Users
             {
@@ -95,7 +95,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateUserWithoutPasswordTest()
+        public void Create_UserWithoutPassword_NoPasswordErrorMessage()
         {
             var answer = repository.Create(new Users
             {
@@ -109,7 +109,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateUserWithDbErrorTest()
+        public void Create_User_DbErrorMessage()
         {
             var answer1 = repository.Create(new Users
             {
@@ -129,7 +129,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void AuthenticateTest()
+        public void Authenticate_User_Successfully()
         {
             var answer = repository.Authenticate("Hamlet", "test");
 
@@ -138,7 +138,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void AuthenticationFailTest()
+        public void Authenticate_WrongPassword_WrongUsernameOrPasswordErrorMessage()
         {
             var answer = repository.Authenticate("Hamlet", "wrong");
 
@@ -146,7 +146,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetByIdTest()
+        public void GetById_User_Successfully()
         {
             var answer = repository.GetById(1);
 

@@ -71,7 +71,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateItemTest()
+        public void Create_Item_Successfully()
         {
             var answer = repository.Create(new Item
             {
@@ -86,7 +86,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateItemWithDbErrorTest()
+        public void Create_Item_DbErrorMessage()
         {
             var answer1 = repository.Create(new Item
             {
@@ -109,7 +109,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateRepeatItemTest()
+        public void Create_RepeatedItem_RepeatedItemErrorMessage()
         {
             var answer = repository.Create(new Item
             {
@@ -124,7 +124,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteItemTest()
+        public void Delete_Item_Successfully()
         {
             var answer = repository.Delete(1);
 
@@ -134,7 +134,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteItemWithDbErrorTest()
+        public void Delete_Item_DbErrorMessage()
         {
             var answer1 = repository.Delete(1);
             var answer2 = repository.Delete(2);
@@ -146,7 +146,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteNotExistingItemTest()
+        public void Delete_NotExistingItem_NotFoundErrorMessage()
         {
             var answer = repository.Delete(10);
 
@@ -156,7 +156,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemTest()
+        public void Edit_Item_Successfully()
         {
             var answer = repository.Edit(1, new Item
             {
@@ -170,7 +170,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemWithDbErrorTest()
+        public void Edit_Item_DbErrorMessage()
         {
             var answer1 = repository.Edit(1, new Item
             {
@@ -192,7 +192,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemWithWrongIdTest()
+        public void Edit_ItemWithWrongId_WrongIdErrorMessage()
         {
             var answer = repository.Edit(1, new Item
             {
@@ -206,7 +206,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemThatDoesntExistTest()
+        public void Edit_ItemThatDoesntExist_NotFoundErrorMessage()
         {
             var answer = repository.Edit(20, new Item
             {
@@ -220,7 +220,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetByIdTest()
+        public void GetById_Item_Successfully()
         {
             var answer = repository.GetById(1);
 
@@ -229,7 +229,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetByIdInvalidIdTest()
+        public void GetById_InvalidItemId_InvalidItemErrorMessage()
         {
             var answer = repository.GetById(10);
 

@@ -145,7 +145,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateListTest()
+        public void Create_List_Successfully()
         {
             var answer = repository.Create(new Lists
             {
@@ -158,7 +158,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void CreateListWithDbErrorTest()
+        public void Create_List_DbErrorTest()
         {
             var answer1 = repository.Create(new Lists
             {
@@ -177,7 +177,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteListTest()
+        public void Delete_List_Successfully()
         {
             var answer = repository.Delete(1);
 
@@ -189,7 +189,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteListNotFoundTest()
+        public void Delete_ListThatDoesntExist_NotFoundErrorMessage()
         {
             var answer = repository.Delete(10);
 
@@ -199,7 +199,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void DeleteListWithoutOwnerTest()
+        public void Delete_ListWithoutOwner_InvalidListErrorMessage()
         {
             var answer = repository.Delete(2);
 
@@ -210,7 +210,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemTest()
+        public void Edit_Item_Successfully()
         {
             var answer = repository.Edit(1,
             new Lists
@@ -232,7 +232,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemWithDbErrorTest()
+        public void Edit_Item_DbErrorMessage()
         {
             var answer1 = repository.Edit(1,
             new Lists
@@ -270,7 +270,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemWithWrongIdTest()
+        public void Edit_ItemWithWrongId_WrongIdErrorMessage()
         {
             var answer = repository.Edit(2,
             new Lists
@@ -292,7 +292,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void EditItemThatDoesntExistTest()
+        public void Edit_ItemThatDoesntExist_NotFoundErrorMessage()
         {
             var answer = repository.Edit(10,
             new Lists
@@ -314,7 +314,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetAllListsTest()
+        public void GetAll_ListsFilteredByUser_Successfully()
         {
             
             var answer = repository.GetAll(1, new ObjectPagination {Size = 10, Page = 1 });
@@ -326,7 +326,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetAllListsWithNoListsForUserTest()
+        public void GetAll_WhenUserHasZeroLists_EmptyList()
         {
 
             var answer = repository.GetAll(5, new ObjectPagination { Size = 10, Page = 1 });
@@ -337,7 +337,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetByIdListTest()
+        public void GetById_List_Successfully()
         {
             var answer = repository.GetById(1, new ObjectPagination { Size = 10, Page = 1 });
 
@@ -347,7 +347,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void GetByIdListNotFoundTest()
+        public void GetById_ListWithInvalidId_NotFoundErrorMessage()
         {
             var answer = repository.GetById(5, new ObjectPagination { Size = 10, Page = 1 });
 
@@ -355,7 +355,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void ShareListTest()
+        public void Share_List_Successfully()
         {
             var answer = repository.Share(1, 2);
 
@@ -364,7 +364,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void ShareListInvalidUserTest()
+        public void Share_ListWithAnInvalidUser_InvalidUserErrorMessage()
         {
             var answer = repository.Share(1, 4);
 
@@ -372,7 +372,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void ShareListInvalidListTest()
+        public void Share_ListWithInvalidListId_InvalidListErrorMessage()
         {
             var answer = repository.Share(5,1);
 
@@ -380,7 +380,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void ShareListWithUserThatAlreadyHasAccessTest()
+        public void Share_ListWithUserThatAlreadyHasAccess_UserAlreadyHasAccessErrorMessage()
         {
             var answer = repository.Share(1, 1);
 
@@ -388,7 +388,7 @@ namespace wishlist.Tests
         }
 
         [Test]
-        public void ShareListWithDBErrorTest()
+        public void Share_List_DBErrorMessage()
         {
             var answer1 = repository.Share(1, 2);
             var answer2 = repository.Share(1, 3);

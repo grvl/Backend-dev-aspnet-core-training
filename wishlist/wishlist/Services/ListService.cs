@@ -47,8 +47,8 @@ namespace wishlist.Services
         {
             var items = _context.Item.Where(i => i.ListId == id);
             var userList = _context.UserList.Where(ul => ul.ListId == id);
-            var List = _context.List.FirstOrDefault(l => l.ListId == id);
-            if (List == null)
+            var list = _context.List.FirstOrDefault(l => l.ListId == id);
+            if (list == null)
             {
                 return new ReturnObject<List> { Message = "List not found." };
             }
@@ -56,14 +56,14 @@ namespace wishlist.Services
             if (userList.Count() == 0)
             {
                 _context.Item.RemoveRange(items);
-                _context.List.Remove(List);
+                _context.List.Remove(list);
                 _context.SaveChanges();
                 return new ReturnObject<List> { Message = "List without owner." };
             }
 
             _context.Item.RemoveRange(items);
             _context.UserList.RemoveRange(userList);
-            _context.List.Remove(List);
+            _context.List.Remove(list);
             _context.SaveChanges();
 
             return new ReturnObject<List> ();

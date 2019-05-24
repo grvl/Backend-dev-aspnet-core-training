@@ -13,5 +13,6 @@ namespace wishlist.Interfaces
         ReturnObject<Users> GetAll();
         ReturnObject<Users> GetById(int id);
         ReturnObject<Users> Create(Users user);
+        ReturnObject<PaginatedObject<Users>> Search(SearchQuery searchUser, ObjectPagination objectPagination);
     }
 }

@@ -41,27 +41,15 @@ https://localhost:44323/swagger/index.html
 		-> Role (str) -  default 'user', pode ser 'admin'
 		
 -> Futuras possíveis melhorias
-	-> implementar hashing e salting de senhas
 
-	-> Pesquisa com filtro para listas e itens
-
-	-> Pesquisa de outros usuários
+	-> Pesquisa com filtro para itens
 	
-	-> Permissões limitadas em sharing de listas
-		-> Viewonly, apenas adicionar, apenas editar, etc
-		-> Opção de revogar direitos dos usuários não criadores
+	-> Opção de revogar direitos dos usuários não criadores em listas
 	
 	-> Listas públicas ou view only em vez de só private
-		-> URL para share a lista para visualização sem autentiacação
+		-> diretório de listas públicas
 	
-	-> diretório de pesquisar outras listas
-		-> Dependente da implementação de diferentes tipos de permissão de visualização de lista
-	
-	-> pesquisa de outros usuários
-		-> Opções de visualização também seriam implementadas para usuário
+	-> Opções de visualização também seriam implementadas para usuário
 	
 	-> aumentar a quantidade de dados que se pode armazenar sobre um item
 		-> Fotos, descrição, etc
-	
-	-> Tracking parcial de itens 
-		-> Ex: 1/2 obtidos

@@ -317,7 +317,7 @@ namespace wishlist.Tests
         public void GetAll_ListsFilteredByUser_Successfully()
         {
             
-            var answer = repository.GetAll(1, new ObjectPagination {Size = 10, Page = 1 });
+            var answer = repository.GetAll(1, new ObjectPagination {Size = 10, Page = 1 }, new SearchQuery { query = "" });
 
             Assert.IsFalse(answer.HasMessage());
             Assert.AreEqual(2, answer.Value.Result.Count());
@@ -329,7 +329,7 @@ namespace wishlist.Tests
         public void GetAll_WhenUserHasZeroLists_EmptyList()
         {
 
-            var answer = repository.GetAll(5, new ObjectPagination { Size = 10, Page = 1 });
+            var answer = repository.GetAll(5, new ObjectPagination { Size = 10, Page = 1 }, new SearchQuery { query = "" });
 
             Assert.IsFalse(answer.HasMessage());
             Assert.AreEqual(0, answer.Value.Result.Count());
@@ -357,7 +357,7 @@ namespace wishlist.Tests
         [Test]
         public void Share_List_Successfully()
         {
-            var answer = repository.Share(1, 2);
+            var answer = repository.Share(1, 2, true);
 
             Assert.IsFalse(answer.HasMessage());
             Assert.AreEqual("Hamlet", answer.Value.ListName);
@@ -366,7 +366,7 @@ namespace wishlist.Tests
         [Test]
         public void Share_ListWithAnInvalidUser_InvalidUserErrorMessage()
         {
-            var answer = repository.Share(1, 4);
+            var answer = repository.Share(1, 4, true);
 
             Assert.IsTrue(answer.HasMessage());
         }
@@ -374,7 +374,7 @@ namespace wishlist.Tests
         [Test]
         public void Share_ListWithInvalidListId_InvalidListErrorMessage()
         {
-            var answer = repository.Share(5,1);
+            var answer = repository.Share(5,1, true);
 
             Assert.IsTrue(answer.HasMessage());
         }
@@ -382,7 +382,7 @@ namespace wishlist.Tests
         [Test]
         public void Share_ListWithUserThatAlreadyHasAccess_UserAlreadyHasAccessErrorMessage()
         {
-            var answer = repository.Share(1, 1);
+            var answer = repository.Share(1, 1, true);
 
             Assert.IsTrue(answer.HasMessage());
         }
@@ -390,8 +390,8 @@ namespace wishlist.Tests
         [Test]
         public void Share_List_DBErrorMessage()
         {
-            var answer1 = repository.Share(1, 2);
-            var answer2 = repository.Share(1, 3);
+            var answer1 = repository.Share(1, 2, true);
+            var answer2 = repository.Share(1, 3, true);
 
             Assert.IsFalse(answer1.HasMessage());
             Assert.IsTrue(answer2.HasMessage());

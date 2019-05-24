@@ -24,8 +24,8 @@ namespace wishlist.Helpers
             PageNumber = objectPagination.Page;
             PageSize = objectPagination.Size;
             Result = list;
-            Previous = (objectPagination.Page > 1) ? $"{type}?size={objectPagination.Size}&page={objectPagination.Page - 1}" : "";
-            Next = (objectPagination.Page<totalPages) ? $"{type}?size={objectPagination.Size}&page={objectPagination.Page + 1}" : "";
+            Previous = (objectPagination.Page > 1) ? $"{type}size={objectPagination.Size}&page={objectPagination.Page - 1}" : "";
+            Next = (objectPagination.Page<totalPages) ? $"{type}size={objectPagination.Size}&page={objectPagination.Page + 1}" : "";
         }
 
     }

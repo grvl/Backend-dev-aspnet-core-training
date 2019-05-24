@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -65,6 +67,7 @@ namespace wishlist
             services.AddScoped<IListService, ListService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IPasswordHasher<String>, PasswordHasher<String>>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new Info { Description = "Documentação da API", Version = "1.0" });

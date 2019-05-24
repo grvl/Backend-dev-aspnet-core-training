@@ -85,6 +85,23 @@ namespace wishlist.Controllers
             return Ok(response.Value);
         }
 
+        [HttpGet("search")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 400, Type = typeof(string))]
+        [SwaggerOperation(
+            Summary = "Search for usernames.",
+            Description = "To facilitate sharing lists."
+        )]
+        public IActionResult SearchUser([FromQuery]SearchQuery searchUser, [FromQuery]ObjectPagination objectPagination)
+        {
+            var response = _userService.Search(searchUser, objectPagination);
+
+            if (response.HasMessage())
+                return BadRequest(new { message = response.Message });
+
+            return Ok(response.Value);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]

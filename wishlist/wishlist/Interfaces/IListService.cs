@@ -10,10 +10,10 @@ namespace wishlist.Interfaces
     public interface IListService
     {
         ReturnObject<ListWithPaginatedItems> GetById(int id, ObjectPagination objectPagination);
-        ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination);
+        ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination, SearchQuery searchQuery);
         ReturnObject<List> Create(List list, int userId);
         ReturnObject<List> Edit(int id, List list);
-        ReturnObject<List> Share(int listId, int userId);
+        ReturnObject<List> Share(int listId, int userId, bool editPermission);
         ReturnObject<List> Delete(int id);
     }
 }

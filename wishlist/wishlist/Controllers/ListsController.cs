@@ -36,9 +36,9 @@ namespace wishlist.Controllers
             Summary = "Get all lists owned or shared with the user.",
             Description = "Can't access a list of lists for another user."
         )]
-        public ActionResult<List> GetLists([FromQuery] ObjectPagination objectPagination)
+        public ActionResult<List> GetLists([FromQuery] ObjectPagination objectPagination, [FromQuery]SearchQuery searchQuery)
         {
-            var response =  _listService.GetAll(int.Parse(User.Identity.Name), objectPagination);
+            var response =  _listService.GetAll(int.Parse(User.Identity.Name), objectPagination, searchQuery);
 
             if (response.HasMessage())
             {
@@ -55,15 +55,10 @@ namespace wishlist.Controllers
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
             Summary = "Get information from a list.",
-            Description = "Normal users can only access lists they own, while admins can access any list."
+            Description = "Normal users can see any list, but not edit them, while admins can access any list."
         )]
         public ActionResult<List> GetList(int id, [FromQuery] ObjectPagination objectPagination)
         {
-            if (!IsListOwnerOrAdmin(id))
-            {
-                return Forbid();
-            }
-
             var response = _listService.GetById(id, objectPagination);
 
             if (response.HasMessage())
@@ -112,14 +107,14 @@ namespace wishlist.Controllers
             "Normal users can only share lists they own, while admins can share any list. When you share a list, the" +
             " other user will have all the same rights as you with the list."
         )]
-        public  ActionResult<List> ShareList(int id, int userId)
+        public  ActionResult<List> ShareList(int id, int userId, [FromBody]bool editPermission)
         {
             if (!IsListOwnerOrAdmin(id))
             {
                 return Forbid();
             }
 
-            var response = _listService.Share(id, userId);
+            var response = _listService.Share(id, userId, editPermission);
 
             if (response.HasMessage())
             {
@@ -177,7 +172,7 @@ namespace wishlist.Controllers
         private bool IsListOwnerOrAdmin(int id)
         {
             var currentUserId = int.Parse(User.Identity.Name);
-            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId).Count() > 0;
+            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId && ul.EditPermission == true).Count() > 0;
             return (userIsOwner || User.IsInRole(Role.Admin));
         }
     }

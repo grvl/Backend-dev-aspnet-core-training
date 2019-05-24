@@ -95,16 +95,18 @@ namespace wishlist.Services
             return new ReturnObject<List> { Value = list };
         }
 
-        public ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination)
+        public ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination, SearchQuery searchQuery)
         {
-            var list = _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
+            var list = _context.List
+            .Where(l => l.ListName.Contains(searchQuery.query) && l.UserList.Any(u => u.UserId == currentUserId))
+            .Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
 
             if (list == null)
             {
                 return new ReturnObject<PaginatedObject<List>> { Message = "Error in retrieving the list." };
             }
 
-            var paginatedList = new PaginatedObject<List>("list", objectPagination, list, _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Count());
+            var paginatedList = new PaginatedObject<List>("list?", objectPagination, list, _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Count());
 
             return new ReturnObject<PaginatedObject<List>> { Value = paginatedList };
         }
@@ -120,6 +122,7 @@ namespace wishlist.Services
             {
                 return new ReturnObject<ListWithPaginatedItems> { Message = "List not found." };
             }
+            //var userList = _context.UserList.Where(ul => ul.ListId == id).ToList();
             var items = _context.Item.Where(i => i.ListId == list.ListId).Select(i => new Item {
                 ItemId = i.ItemId,
                 ItemName = i.ItemName,
@@ -127,12 +130,12 @@ namespace wishlist.Services
                 Price = i.Price,
                 Bought = i.Bought
             }).Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
-            var paginatedItems = new PaginatedObject<Item>($"list/{id}", objectPagination, items, _context.Item.Where(i => i.ListId == list.ListId).Count());
+            var paginatedItems = new PaginatedObject<Item>($"list/{id}?", objectPagination, items, _context.Item.Where(i => i.ListId == list.ListId).Count());
 
             return new ReturnObject<ListWithPaginatedItems> { Value = new ListWithPaginatedItems { list = list, paginatedItems = paginatedItems } };
         }
 
-        public ReturnObject<List> Share(int listId, int userId)
+        public ReturnObject<List> Share(int listId, int userId, bool editPermission)
         {
             var list = _context.List.FirstOrDefault(l => l.ListId == listId);
 
@@ -150,7 +153,8 @@ namespace wishlist.Services
                 _context.UserList.Add(new UserList
                 {
                     ListId = listId,
-                    UserId = userId
+                    UserId = userId,
+                    EditPermission = editPermission
                 });
 
                 _context.SaveChanges();

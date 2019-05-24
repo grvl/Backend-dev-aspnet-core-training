@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -18,15 +20,18 @@ namespace wishlist.Services
     {
         
         private readonly WishlistDBContext _context;
+        private readonly IPasswordHasher<string> _passwordHasher;
 
-        public UserService(WishlistDBContext context)
+        public UserService(WishlistDBContext context, IPasswordHasher<String> passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         public ReturnObject<Users> Authenticate(string username, string password)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Username == username && x.Pswd == password);
+            var user = _context.Users.SingleOrDefault(x => x.Username == username && 
+            _passwordHasher.VerifyHashedPassword(username, x.Pswd, password) != PasswordVerificationResult.Failed);
 
             // return null if user not found
             if (user == null)
@@ -52,7 +57,7 @@ namespace wishlist.Services
                 return new ReturnObject<Users> { Message = "You must input a password." };
             }
 
-            _context.Users.Add(new Users { Username = user.Username, Pswd = user.Pswd });
+            _context.Users.Add(new Users { Username = user.Username, Pswd = _passwordHasher.HashPassword(user.Username, user.Pswd) });
             try
             {
                 _context.SaveChanges();
@@ -63,6 +68,23 @@ namespace wishlist.Services
             }
 
             return new ReturnObject<Users> {Value = user }; ;
+        }
+
+        public ReturnObject<PaginatedObject<Users>> Search(SearchQuery searchUser, ObjectPagination objectPagination)
+        {
+            var users = _context.Users.Where(u => u.Username.Contains(searchUser.query))
+                .Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size)
+                .Select(u => new Users {Username = u.Username,
+                                        UserId = u.UserId}).ToList();
+
+            if (users == null)
+            {
+                return new ReturnObject<PaginatedObject<Users>> { Message = "Error in retrieving the list." };
+            }
+
+            var paginatedUsers = new PaginatedObject<Users>($"users/search?query={searchUser.query}&", objectPagination, users, _context.Users.Where(u => u.Username.Contains(searchUser.query)).Count());
+
+            return new ReturnObject<PaginatedObject<Users>> { Value = paginatedUsers };
         }
 
         public ReturnObject<Users> GetAll()

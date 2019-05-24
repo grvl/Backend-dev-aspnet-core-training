@@ -7,6 +7,7 @@ using wishlist.Models;
 using wishlist.Services;
 using wishlist.Interfaces;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace wishlist.Tests
 { 
@@ -27,7 +28,7 @@ namespace wishlist.Tests
                 {
                     UserId = 1,
                     Username = "Hamlet",
-                    Pswd = "test"
+                    Pswd = "AQAAAAEAACcQAAAAEPGmmTCHomNYn5AeaowIyhBZjdeop7yQzBfcRc+79vrruuMicxiuvX2Et1xprI+CIg=="
                 },
                 new Users
                 {
@@ -52,7 +53,7 @@ namespace wishlist.Tests
                 .Throws(new Exception());
 
             // Act - fetch Users
-            repository = new UserService(mockContext.Object);
+            repository = new UserService(mockContext.Object, new PasswordHasher<String>());
         }
 
         [Test]
@@ -131,7 +132,7 @@ namespace wishlist.Tests
         [Test]
         public void Authenticate_User_Successfully()
         {
-            var answer = repository.Authenticate("Hamlet", "test");
+            var answer = repository.Authenticate("Hamlet", "123");
 
             Assert.IsFalse(answer.HasMessage());
             Assert.Null(answer.Value.Token);

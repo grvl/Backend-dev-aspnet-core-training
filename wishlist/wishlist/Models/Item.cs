@@ -10,7 +10,7 @@ namespace wishlist.Models
         public string ItemName { get; set; }
         public int? Quantity { get; set; }
         public decimal? Price { get; set; }
-        public bool? Bought { get; set; }
+        public int? Bought { get; set; }
 
         public virtual List List { get; set; }
     }

@@ -34,6 +34,7 @@ IF OBJECT_ID(N'dbo.UserList', N'U') IS NULL
 		CREATE TABLE dbo.UserList
 			(UserId		int NOT NULL,
 			ListId		int NOT NULL,
+			EditPermission	bit	DEFAULT 0,
 			PRIMARY KEY(userId, ListId),
 			CONSTRAINT FK_UserOwner FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
 			CONSTRAINT FK_ListOwned FOREIGN KEY (ListId) REFERENCES dbo.List(ListId)
@@ -49,7 +50,7 @@ IF OBJECT_ID(N'dbo.Item', N'U') IS NULL
 			ItemName	varchar(50) NOT NULL,
 			Quantity	int DEFAULT 1,
 			Price		money DEFAULT 0.00,
-			Bought		bit DEFAULT 0,
+			Bought		int DEFAULT 0,
 			CONSTRAINT FK_PartOfList FOREIGN KEY (ListId) REFERENCES dbo.List(ListId),
 			PRIMARY KEY (ItemId)
 			)

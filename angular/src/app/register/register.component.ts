@@ -26,10 +26,8 @@ export class RegisterComponent implements OnInit {
 
     ngOnInit() {
         this.registerForm = this.formBuilder.group({
-            firstName: ['', Validators.required],
-            lastName: ['', Validators.required],
             username: ['', Validators.required],
-            password: ['', [Validators.required, Validators.minLength(6)]]
+            pswd: ['', [Validators.required, Validators.minLength(6)]]
         });
     }
 
@@ -41,9 +39,9 @@ export class RegisterComponent implements OnInit {
 
         // stop here if form is invalid
         if (this.registerForm.invalid) {
+          console.log(this.registerForm);
             return;
         }
-
         this.loading = true;
         this.userService.register(this.registerForm.value)
             .pipe(first())

@@ -7,6 +7,9 @@ import { ItemComponent }  from './item/item.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { AuthGuard } from './_guards/auth.guard';
+import { AdminComponent } from './admin/admin.component';
+import { Role } from './_models/role';
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full', canActivate: [AuthGuard] },
@@ -15,6 +18,12 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'list/:id', component: ListComponent, canActivate: [AuthGuard] },
   { path: 'list/:id/:id', component: ItemComponent, canActivate: [AuthGuard] },
+  {
+       path: 'admin',
+       component: AdminComponent,
+       canActivate: [AuthGuard],
+       data: { userRoles: [Role.Admin] }
+   },
 
   { path: '**', redirectTo: '' }
 ];

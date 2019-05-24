@@ -1,15 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { first } from 'rxjs/operators';
 
-@Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
-})
-export class DashboardComponent implements OnInit {
+import { User } from '../_models/user';
+import { UserService, AuthenticationService } from '../_services';
 
-  constructor() { }
+@Component({templateUrl: 'dashboard.component.html'})
+export class DashboardComponent {
+    currentUser: User;
+    userFromApi: any;
 
-  ngOnInit() {
-  }
+    constructor(
+        private userService: UserService,
+        private authenticationService: AuthenticationService
+    ) {
+        this.currentUser = this.authenticationService.currentUserValue;
+    }
 
+    ngOnInit() {
+        // this.userService.getById(this.currentUser.userId).pipe(first()).subscribe(user => {
+        //     this.userFromApi = user;
+        // });
+        console.log(this.currentUser);
+        this.userFromApi = this.currentUser;
+    }
 }

@@ -10,8 +10,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { RegisterComponent } from './register/register.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AlertComponent } from "./alert/alert.component"
-import { fakeBackendProvider } from './_helpers';
+// import { fakeBackendProvider } from './_helpers';
 import { JwtInterceptor, ErrorInterceptor } from './_helpers';
+import { AdminComponent } from './admin/admin.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { JwtInterceptor, ErrorInterceptor } from './_helpers';
     DashboardComponent,
     ListComponent,
     ItemComponent,
-    RegisterComponent
+    RegisterComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
@@ -35,7 +37,7 @@ import { JwtInterceptor, ErrorInterceptor } from './_helpers';
       { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
 
       // provider used to create fake backend
-      fakeBackendProvider
+      // fakeBackendProvider
   ],
   bootstrap: [AppComponent]
 })

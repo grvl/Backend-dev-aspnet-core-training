@@ -97,31 +97,46 @@ namespace wishlist.Services
 
         public ReturnObject<PaginatedObject<List>> GetAll(int currentUserId, ObjectPagination objectPagination, SearchQuery searchQuery)
         {
-            var list = _context.List
-            .Where(l => l.ListName.Contains(searchQuery.query) && l.UserList.Any(u => u.UserId == currentUserId))
-            .Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).ToList();
+            var userList = _context.UserList.Where(u => u.UserId == currentUserId).Skip((objectPagination.Page - 1) * objectPagination.Size).Take(objectPagination.Size).Select(u=>u.ListId).ToList();
+            var list = _context.List.Where(l => userList.Contains(l.ListId)).ToList();
+            
 
             if (list == null)
             {
                 return new ReturnObject<PaginatedObject<List>> { Message = "Error in retrieving the list." };
             }
 
-            var paginatedList = new PaginatedObject<List>("list?", objectPagination, list, _context.List.Where(l => l.UserList.Any(u => u.UserId == currentUserId)).Count());
+            var paginatedList = new PaginatedObject<List>("list?", objectPagination, list, _context.UserList.Where(u => u.UserId == currentUserId).Count());
 
             return new ReturnObject<PaginatedObject<List>> { Value = paginatedList };
         }
 
         public ReturnObject<ListWithPaginatedItems> GetById(int id, ObjectPagination objectPagination)
         {
-            var list = _context.List.Where(l => l.ListId == id).Include(l => l.UserList).Select(l => new List {
+            var list = _context.List.Where(l => l.ListId == id).Select(l => new List {
                 ListId = l.ListId,
-                ListName = l.ListName,
-                UserList = l.UserList
+                ListName = l.ListName
             }).FirstOrDefault();
+
             if (list == null)
             {
                 return new ReturnObject<ListWithPaginatedItems> { Message = "List not found." };
             }
+
+            var userList = _context.UserList.Where(ul => ul.ListId == id).Include(ul => ul.User).Select(ul => new UserList
+            {
+                UserId = ul.UserId,
+                ListId = ul.ListId,
+                EditPermission = ul.EditPermission,
+                User = new Users
+                {
+                    UserId = ul.User.UserId,
+                    Username = ul.User.Username
+                }
+            }).ToList();
+
+            list.UserList = userList;
+
             //var userList = _context.UserList.Where(ul => ul.ListId == id).ToList();
             var items = _context.Item.Where(i => i.ListId == list.ListId).Select(i => new Item {
                 ItemId = i.ItemId,

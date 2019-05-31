@@ -1,6 +1,7 @@
 import { List } from './list';
 import { PaginatedObject } from './paginatedObject';
-export class ListWithPaginatedItems<T> {
+import { Item } from './item';
+export class ListWithPaginatedItems {
   list: List;
-  paginatedItems: PaginatedObject<T>;
+  paginatedItems: PaginatedObject<Item>;
 }

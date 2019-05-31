@@ -2,9 +2,11 @@ import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent }   from './dashboard/dashboard.component';
-import { ListComponent }      from './list/list.component';
-import { ItemComponent }  from './item/item.component';
+import { ListComponent }      from './list/listIndex/list.component';
+import { ItemComponent }  from './item/item-details/item.component';
 import { LoginComponent } from './login/login.component';
+import { ListDetailComponent } from './list/list-detail/list-detail.component';
+import { ListCreateComponent } from './list/list-create/list-create.component'
 import { RegisterComponent } from './register/register.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { AdminComponent } from './admin/admin.component';
@@ -16,14 +18,12 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegisterComponent},
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-  { path: 'list/:id', component: ListComponent, canActivate: [AuthGuard] },
-  { path: 'list/:id/:id', component: ItemComponent, canActivate: [AuthGuard] },
-  {
-       path: 'admin',
-       component: AdminComponent,
-       canActivate: [AuthGuard],
-       data: { userRoles: [Role.Admin] }
-   },
+  { path: 'list', component: ListComponent, canActivate: [AuthGuard] },
+  { path: 'list/new', component: ListCreateComponent, canActivate: [AuthGuard] },
+  { path: 'list/:listId', component: ListDetailComponent, canActivate: [AuthGuard] },
+  { path: 'list/:listId/:itemId', component: ItemComponent, canActivate: [AuthGuard] },
+  {path: 'admin', component: AdminComponent, canActivate: [AuthGuard], data: { userRoles: [Role.Admin] }
+  },
 
   { path: '**', redirectTo: '' }
 ];

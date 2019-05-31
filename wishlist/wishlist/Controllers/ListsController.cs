@@ -30,7 +30,7 @@ namespace wishlist.Controllers
 
         // GET: api/List
         [HttpGet]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 200, Type = typeof(PaginatedObject<List>))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [SwaggerOperation(
             Summary = "Get all lists owned or shared with the user.",
@@ -50,7 +50,7 @@ namespace wishlist.Controllers
 
         // GET: api/List/5
         [HttpGet("{id}")]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 200, Type = typeof(ListWithPaginatedItems))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
@@ -59,6 +59,11 @@ namespace wishlist.Controllers
         )]
         public ActionResult<List> GetList(int id, [FromQuery] ObjectPagination objectPagination)
         {
+            if (!canViewListOrAdmin(id))
+            {
+                return BadRequest(new { message = "You don't have permission to access this list." }); ;
+            }
+
             var response = _listService.GetById(id, objectPagination);
 
             if (response.HasMessage())
@@ -71,7 +76,7 @@ namespace wishlist.Controllers
 
         // PUT: api/List/5
         [HttpPut("{id}")]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        [ProducesResponseType(statusCode: 200, Type = typeof(List))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
@@ -82,7 +87,7 @@ namespace wishlist.Controllers
         {
             if (!IsListOwnerOrAdmin(id))
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
 
@@ -96,9 +101,9 @@ namespace wishlist.Controllers
             return Ok(response.Value);
         }
 
-        // PUT: api/List/5/1
-        [HttpPut("{id}/{userId}")]
-        [ProducesResponseType(statusCode: 200, Type = typeof(Users))]
+        // get: api/List/5/1
+        [HttpGet("{id}/{userId}")]
+        [ProducesResponseType(statusCode: 200, Type = typeof(List))]
         [ProducesResponseType(statusCode: 400, Type = typeof(string))]
         [ProducesResponseType(statusCode: 403)]
         [SwaggerOperation(
@@ -107,14 +112,14 @@ namespace wishlist.Controllers
             "Normal users can only share lists they own, while admins can share any list. When you share a list, the" +
             " other user will have all the same rights as you with the list."
         )]
-        public  ActionResult<List> ShareList(int id, int userId, [FromBody]bool editPermission)
+        public  ActionResult<List> ShareList(int id, int userId)//, [FromBody]bool editPermission = false)
         {
             if (!IsListOwnerOrAdmin(id))
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
-            var response = _listService.Share(id, userId, editPermission);
+            var response = _listService.Share(id, userId, false);
 
             if (response.HasMessage())
             {
@@ -157,7 +162,7 @@ namespace wishlist.Controllers
         {
             if (!IsListOwnerOrAdmin(id))
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             var response = _listService.Delete(id);
@@ -175,5 +180,13 @@ namespace wishlist.Controllers
             var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId && ul.EditPermission == true).Count() > 0;
             return (userIsOwner || User.IsInRole(Role.Admin));
         }
+
+        private bool canViewListOrAdmin(int id)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            var userIsOwner = _context.UserList.Where(ul => ul.ListId == id && ul.UserId == currentUserId).Count() > 0;
+            return (userIsOwner || User.IsInRole(Role.Admin));
+        }
+
     }
 }

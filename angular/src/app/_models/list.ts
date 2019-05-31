@@ -1,10 +1,8 @@
 import { UserList } from './userList';
-import { User } from './user';
+import { Item } from './item';
 export class List {
-  userId: number;
   listId: number;
-  editPermission: boolean;
-  list: List;
-  user: User;
-  userList: UserList;
+  listName: String;
+  itemList?: Item;
+  userList?: UserList[];
 }

@@ -39,7 +39,7 @@ namespace wishlist.Controllers
             var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
             if (!permissionCheck)
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             var response = _itemService.GetById(id);
@@ -66,7 +66,7 @@ namespace wishlist.Controllers
             var permissionCheck = _itemService.IsListOwnerOrAdmin(Item, User);
             if (!permissionCheck)
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             var response =  _itemService.Edit(id, Item);
@@ -92,7 +92,7 @@ namespace wishlist.Controllers
             var permissionCheck = _itemService.IsListOwnerOrAdmin(Item, User);
             if (!permissionCheck)
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             var response =  _itemService.Create(Item);
@@ -119,8 +119,8 @@ namespace wishlist.Controllers
         {
             var permissionCheck = _itemService.IsListOwnerOrAdmin(id, User);
             
-            if (permissionCheck) { 
-                return Forbid();
+            if (!permissionCheck) { 
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             var response =  _itemService.Delete(id);

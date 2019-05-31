@@ -1,0 +1,77 @@
+.nav_details {
+  display: flex;
+  align-items: center;
+}
+
+select {
+  width: auto;
+}
+
+.item_button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  cursor: hand;
+  font-family: Arial;
+  margin: .5em;
+  padding: .3em 0;
+  height: 1.6em;
+  border-radius: 4px;
+}
+
+.item_button:hover, {
+  color: #7486d4;
+  background-color: #c4e0dd;
+  left: .1em;
+}
+
+.items {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.list {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.list_info, .list_items{
+  width: 30%;
+}
+
+.list_users{
+  width: 40%
+}
+
+.list_info, .list_items, .list_users {
+  background-color: #DDD;
+  border-style: groove;
+}
+
+.list_users {
+  border-top-right-radius: 1em;
+  border-bottom-right-radius: 1em;
+}
+
+.list_info {
+  border-top-left-radius: 1em;
+  border-bottom-left-radius: 1em;
+}
+
+.buttons {
+  display: flex;
+  width: 30%;
+}
+
+.btn-delete{
+  background-color: red;
+  border-color: red;
+  margin-left: 2em;
+}
+
+.items_title {
+  align-items: flex;
+}

@@ -1,18 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { first } from 'rxjs/operators';
 
 import { User } from '../_models/user';
-import { UserService } from '../_services';
+import { UserService, AlertService } from '../_services';
 
 @Component({templateUrl: 'admin.component.html'})
 export class AdminComponent implements OnInit {
     users: User[] = [];
 
-    constructor(private userService: UserService) {}
+    constructor(
+        private userService: UserService,
+        private alertService: AlertService) {}
 
     ngOnInit() {
-        this.userService.getAll().pipe(first()).subscribe(users => {
+        this.userService.getAll().subscribe(
+          users => {
             this.users = users;
-        });
+          },
+          error => {
+            this.alertService.error(error, true);
+          });
     }
 }

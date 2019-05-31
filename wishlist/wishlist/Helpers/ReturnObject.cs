@@ -9,7 +9,7 @@ namespace wishlist.Helpers
     {
         public string Message { get; set; }
         public T Value { get; set; }
-        public IQueryable<T> Values { get; set; }
+        public List<T> Values { get; set; }
 
         public bool HasMessage()
         {

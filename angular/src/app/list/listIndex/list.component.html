@@ -1,0 +1,27 @@
+<div class="lists">
+  <h2>My Lists</h2>
+
+  <div>
+    <!-- (click) passes input value to add() and then clears the input -->
+    <a routerLink="/list/new">New list </a>
+  </div>
+  <ul>
+    <div *ngIf="lists">
+      <li *ngFor="let list of lists.result">
+        <a routerLink="/list/{{list.listId}}">
+          <span class="badge">{{list.listId}}</span> - {{list.listName}}
+        </a>
+      </li>
+
+      <div class="nav_details">page {{lists.pageNumber}}/{{lists.totalPages}}
+        <div class="nav_buttons">
+            <button *ngIf="lists.previous" (click)="previous()"><-</button>
+            <select class="form-control" [(ngModel)]="selectedSize" (change)="onSizeSelect($event.target.value)" id="sel1">
+              <option *ngFor="let size of sizes" value= {{size}}> {{size}} </option>
+            </select>
+            <button *ngIf="lists.next" (click)="next()">-></button>
+          </div>
+      </div>
+    </div>
+  </ul>
+</div>

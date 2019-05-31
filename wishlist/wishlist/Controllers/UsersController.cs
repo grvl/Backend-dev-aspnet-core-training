@@ -82,7 +82,7 @@ namespace wishlist.Controllers
             if (response.HasMessage())
                 return BadRequest(new { message = response.Message });
 
-            return Ok(response.Value);
+            return Ok(response.Values);
         }
 
         [HttpGet("search")]
@@ -123,7 +123,7 @@ namespace wishlist.Controllers
             var currentUserId = int.Parse(User.Identity.Name);
             if (id != currentUserId && !User.IsInRole(Role.Admin))
             {
-                return Forbid();
+                return BadRequest(new { message = "You don't have permission for this action." });;
             }
 
             return Ok(response.Value);

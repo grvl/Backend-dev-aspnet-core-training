@@ -4,15 +4,20 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { ListComponent } from './list/list.component';
-import { ItemComponent } from './item/item.component';
+import { ListComponent } from './list/listIndex/list.component';
+import { ItemComponent } from './item/item-details/item.component';
 import { AppRoutingModule } from './app-routing.module';
 import { RegisterComponent } from './register/register.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AlertComponent } from "./alert/alert.component"
 // import { fakeBackendProvider } from './_helpers';
 import { JwtInterceptor, ErrorInterceptor } from './_helpers';
 import { AdminComponent } from './admin/admin.component';
+import { ListDetailComponent } from './list/list-detail/list-detail.component';
+import { ListCreateComponent } from './list/list-create/list-create.component';
+import { UserSearchComponent } from './user-search/user-search.component';
+import { ItemCreateComponent } from './item/item-create/item-create.component';
+import { ItemEditComponent } from './item/item-edit/item-edit.component';
+import { AlertComponent } from './alert';
 
 @NgModule({
   declarations: [
@@ -23,7 +28,12 @@ import { AdminComponent } from './admin/admin.component';
     ListComponent,
     ItemComponent,
     RegisterComponent,
-    AdminComponent
+    AdminComponent,
+    ListDetailComponent,
+    ListCreateComponent,
+    UserSearchComponent,
+    ItemCreateComponent,
+    ItemEditComponent
   ],
   imports: [
     BrowserModule,

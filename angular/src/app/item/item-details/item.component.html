@@ -1,0 +1,24 @@
+<div><h4>Items</h4>
+  <button *ngIf="newItem==false" (click)="newItem = true">New item</button>
+  <div *ngIf="newItem==true">
+    <app-item-create [listId]="listId"></app-item-create>
+    <button (click)="newItem = false">cancel</button>
+  </div>
+
+  <ul *ngIf="itemsExtended">
+    <li *ngFor="let itemExtended of itemsExtended">
+      <button (click)="itemExtended.item.reveal = !itemExtended.item.reveal; itemExtended.itemEdit = false">{{itemExtended.item.itemName}}</button>
+      <ul *ngIf="itemExtended.item.reveal">
+        <div *ngIf="itemExtended.itemEdit == false">
+          <li>Progress: {{itemExtended.item.bought}} / {{itemExtended.item.quantity}}</li>
+          <li>Price: ${{itemExtended.item.price}}</li>
+          <button (click)="itemExtended.itemEdit = true">edit item</button>
+        </div>
+
+          <app-item-edit *ngIf="itemExtended.itemEdit == true" [itemExtended]="itemExtended" ></app-item-edit>
+
+
+      </ul>
+    </li>
+  </ul>
+</div>

@@ -34,7 +34,7 @@ IF OBJECT_ID(N'dbo.UserList', N'U') IS NULL
 		CREATE TABLE dbo.UserList
 			(UserId		int NOT NULL,
 			ListId		int NOT NULL,
-			EditPermission	bit	DEFAULT 0,
+			EditPermission	bit	DEFAULT 1,
 			PRIMARY KEY(userId, ListId),
 			CONSTRAINT FK_UserOwner FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
 			CONSTRAINT FK_ListOwned FOREIGN KEY (ListId) REFERENCES dbo.List(ListId)

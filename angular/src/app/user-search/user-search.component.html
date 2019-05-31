@@ -1,0 +1,23 @@
+<div id="search-component">
+  <h5>Share the list with...</h5>
+
+  <div class="search-box"><input #searchBox id="search-box" (keyup.enter)="search(searchBox.value)">
+  <button class="btn btn-primary" (click)="search(searchBox.value)">search</button>
+  </div>
+
+  <div *ngIf="paginatedUsers">
+    <ul class="search-result">
+      <li *ngFor="let user of paginatedUsers.result" >
+        <button class="user_button" (click)="share(user.userId)">{{user.username}}</button>
+      </li>
+    </ul>
+
+    <div class="nav_details">
+      <div class="nav_buttons">
+          <button *ngIf="paginatedUsers.previous" (click)="previous()"><-</button>
+          page {{paginatedUsers.pageNumber}}/{{paginatedUsers.totalPages}}
+          <button *ngIf="paginatedUsers.next" (click)="next()">-></button>
+        </div>
+    </div>
+  </div>
+</div>

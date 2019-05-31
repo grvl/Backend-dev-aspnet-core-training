@@ -1,0 +1,79 @@
+<h2>{{list.listName | uppercase}}</h2>
+<div class="list" *ngIf="list">
+  <div class="list_info">
+    <span>id: </span>{{list.listId}}
+    <div *ngIf="!listEdit"><span>name: </span>{{list.listName}}</div>
+
+    <div *ngIf="editPermission && listEdit">
+      <form [formGroup]="listForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+              <label for="name">List Name</label>
+              <input type="text" formControlName="name" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" />
+              <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                  <div *ngIf="f.name.errors.required">Name is required</div>
+              </div>
+          </div>
+          <div class="buttons">
+              <button [disabled]="loading" class="btn btn-primary">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+                  Save
+              </button>
+              <button (click)="changeEditForm()" class="btn btn-primary">Cancel</button>
+
+          </div>
+          <button (click)="DeleteList()" class="btn btn-primary btn-delete">Delete</button>
+      </form>
+    </div>
+
+    <button  *ngIf="editPermission && !listEdit" class="btn btn-primary" (click)="changeEditForm()">Edit</button>
+    <br>
+    <span>Owner: </span>
+    <div *ngIf="usersWithEditPermission">
+      <ul>
+        <li *ngFor="let user of usersWithEditPermission">{{user.username}}</li>
+      </ul>
+    </div>
+    <span>Shared with: </span>
+    <div *ngIf="usersWithViewPermission">
+      <ul>
+        <li *ngFor="let user of usersWithViewPermission">{{user.username}}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="list_items">
+    <div class="items_title"><h4>Items</h4>({{items.total}} items)</div>
+    <button class="btn btn-primary" *ngIf="editPermission && newItem==false" (click)="newItem = true">New item</button>
+    <div *ngIf="newItem==true">
+      <app-item-create [listId]="listId"></app-item-create>
+      <button (click)="newItem = false" class="btn btn-primary">cancel</button>
+    </div>
+
+    <ul class="items" *ngIf="itemsExtended">
+      <li *ngFor="let itemExtended of itemsExtended">
+        <button class="item_button" (click)="itemExtended.item.reveal = !itemExtended.item.reveal; itemExtended.itemEdit = false">{{itemExtended.item.itemName}}</button>
+        <ul *ngIf="itemExtended.item.reveal">
+          <div *ngIf="itemExtended.itemEdit == false">
+            <li>Progress: {{itemExtended.item.bought}} / {{itemExtended.item.quantity}}</li>
+            <li>Price: ${{itemExtended.item.price}}</li>
+            <button class="btn btn-primary" *ngIf="editPermission" (click)="itemExtended.itemEdit = true">edit item</button>
+          </div>
+
+            <app-item-edit *ngIf="itemExtended.itemEdit == true" [itemExtended]="itemExtended" ></app-item-edit>
+
+
+        </ul>
+      </li>
+    </ul>
+
+    <div class="nav_details">
+      <div class="nav_buttons">
+          <button class="nav_button" *ngIf="items.previous" (click)="previous()"><-</button>
+          page {{items.pageNumber}}/{{items.totalPages}}
+          <button class="nav_button" *ngIf="items.next" (click)="next()">-></button>
+        </div>
+    </div>
+  </div>
+
+  <app-user-search class="list_users" *ngIf="editPermission" [listId]="listId"></app-user-search>
+</div>

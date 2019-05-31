@@ -93,7 +93,7 @@ namespace wishlist.Services
             {
                 Username = s.Username,
                 UserRole = s.UserRole
-            });
+            }).ToList();
 
             if (users == null){
                 return new ReturnObject<Users> { Message = " Failed to load list of all users." };

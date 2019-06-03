@@ -32,33 +32,64 @@ select {
   flex-direction: column;
 }
 
-.list {
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-}
-
-.list_info, .list_items{
-  width: 30%;
-}
-
-.list_users{
-  width: 40%
-}
-
 .list_info, .list_items, .list_users {
   background-color: #DDD;
   border-style: groove;
 }
 
+.list {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.list_info, .list_items, .list_users{
+  width: 90%;
+}
+
 .list_users {
-  border-top-right-radius: 1em;
   border-bottom-right-radius: 1em;
+  border-bottom-left-radius: 1em;
 }
 
 .list_info {
+  border-top-right-radius: 1em;
   border-top-left-radius: 1em;
-  border-bottom-left-radius: 1em;
+}
+
+@media not all and (max-width: 720px){
+  .list {
+    flex-direction: row;
+  }
+
+  .list_info, .list_items{
+    width: 30%;
+  }
+
+  .list_users{
+    width: 40%;
+  }
+
+  .list_users {
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
+    border-bottom-left-radius: 0em;
+
+  }
+
+  .list_info {
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+    border-top-right-radius: 0em;
+  }
+}
+
+@media not all and (max-width: 900px){
+  .list_info, .list_items, .list_users{
+    width: 40%;
+    min-width: 250px;
+  }
 }
 
 .buttons {
